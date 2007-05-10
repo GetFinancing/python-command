@@ -132,6 +132,10 @@ class Command:
             usage = usage.split("%command")[0] + '[command]'
         usages = [usage, ]
 
+        # FIXME: abstract this into getUsage that takes an optional
+        # parentCommand on where to stop recursing up
+        # useful for implementing subshells
+
         # walk the tree up for our usage
         c = self.parentCommand
         while c:
