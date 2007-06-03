@@ -174,9 +174,13 @@ class Command:
         """
         Parse the given arguments and act on them.
         """
-        options, args = self.parser.parse_args(argv)
+        print "THOMAS: parsing argv"
+        self.options, args = self.parser.parse_args(argv)
+        print "THOMAS: options %r" % self.options
 
-        ret = self.handleOptions(options)
+        # FIXME: make handleOptions not take options, since we store it
+        # in self.options now
+        ret = self.handleOptions(self.options)
         if ret:
             return ret
 
