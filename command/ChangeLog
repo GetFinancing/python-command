@@ -1,4 +1,9 @@
 2007-06-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* test_command.py:
+	  Add tests from Savon.
+
+2007-06-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* command.py:
 	  Add help command.  Fixes #240.
