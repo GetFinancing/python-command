@@ -182,6 +182,29 @@ class Command:
         if ret:
             return ret
 
+        # handle pleas for help
+        if args and args[0] == 'help':
+            self.debug('Asked for help, args %r' % args)
+            
+            # give help on current command if only 'help' is passed
+            if len(args) == 1:
+                self.outputHelp()
+                return 0
+
+            # complain if we were asked for help on a subcommand, but we don't
+            # have any
+            if not self.subCommands:
+                self.stderr.write('No subcommands defined.')
+                self.parser.print_usage(file=self.stderr)
+                self.stderr.write(
+                    "Use --help to get more information about this command.\n")
+                return 1
+
+            # rewrite the args the other way around;
+            # help doap becomes doap help so it gets deferred to the doap
+            # command
+            args = [args[1], args[0]]
+
         # if we don't have subcommands, defer to our do() method
         if not self.subCommands:
             return self.do(args)
@@ -204,6 +227,12 @@ class Command:
 
         self.stderr.write("Unknown command '%s'.\n" % command)
         return 1
+
+    def outputHelp(self):
+        """
+        Output help information.
+        """
+        self.parser.print_help(file=self.stderr)
 
     def outputUsage(self):
         """
