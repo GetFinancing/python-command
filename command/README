@@ -4,7 +4,7 @@ Suggested use in your project (if you are using Subversion):
 
 - create myproject/extern directory
 - svn commit myproject/extern
-- svn propset svn:externals "command https://apestaart.org/moap/svn/trunk/moap/extern/command"
+- svn propset svn:externals "command https://thomas.apestaart.org/moap/svn/trunk/moap/extern/command"
 
 Alternatively, you can embed only the command.py file with proper svn:externals.
 
