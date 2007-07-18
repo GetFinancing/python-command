@@ -1,3 +1,8 @@
+2007-07-19  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* test_command.py:
+	  Seems on F7 that optparse outputs a capital for the first letter.
+
 2007-06-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* test_command.py:
