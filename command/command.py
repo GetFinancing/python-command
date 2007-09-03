@@ -173,6 +173,9 @@ class Command:
     def parse(self, argv):
         """
         Parse the given arguments and act on them.
+
+        @rtype:   int
+        @returns: an exit code
         """
         self.options, args = self.parser.parse_args(argv)
 
@@ -207,7 +210,13 @@ class Command:
 
         # if we don't have subcommands, defer to our do() method
         if not self.subCommands:
-            return self.do(args)
+            ret = self.do(args)
+
+            # if everything's fine, we return 0
+            if not ret:
+                ret = 0
+
+            return ret
 
         # if we do have subcommands, defer to them
         try:
