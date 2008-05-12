@@ -53,6 +53,8 @@ class CommandOptionParser(optparse.OptionParser):
     I parse options as usual, but I explicitly allow setting stdout
     so that our print_help() method (invoked by default with -h/--help)
     defaults to writing there.
+
+    I also override exit() so that I can be used in interactive shells.
     """
     _stdout = sys.stdout
 
@@ -68,6 +70,10 @@ class CommandOptionParser(optparse.OptionParser):
         if file is None:
             file = self._stdout
         file.write(self.format_help())
+
+    def exit(self, status=0, msg=None):
+        if msg:
+            sys.stderr.write(msg)
 
 class Command:
     """
@@ -174,9 +180,14 @@ class Command:
         """
         Parse the given arguments and act on them.
 
+        @param argv: list of arguments to parse
+        @type  argv: list of str
+
         @rtype:   int
         @returns: an exit code
         """
+        # note: no arguments should be passed as an empty list, not a list
+        # with an empty str as ''.split(' ') returns
         self.options, args = self.parser.parse_args(argv)
 
         # FIXME: make handleOptions not take options, since we store it
@@ -235,6 +246,7 @@ class Command:
                 return self.aliasedSubCommands[command].parse(args[1:])
 
         self.stderr.write("Unknown command '%s'.\n" % command)
+        self.parser.print_usage(file=self.stderr)
         return 1
 
     def outputHelp(self):
