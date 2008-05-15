@@ -55,12 +55,22 @@ class CommandOptionParser(optparse.OptionParser):
     defaults to writing there.
 
     I also override exit() so that I can be used in interactive shells.
+
+    @ivar help_printed:  whether help was printed during parsing
+    @ivar usage_printed: whether usage was printed during parsing
     """
+    help_printed = False
+    usage_printed = False
+
     _stdout = sys.stdout
 
     def set_stdout(self, stdout):
         self._stdout = stdout
 
+    def parse_args(self, args=None, values=None):
+        self.help_printed = False
+        self.usage_printed = False
+        return optparse.OptionParser.parse_args(self, args, values)
     # we're overriding the built-in file, but we need to since this is
     # the signature from the base class
     __pychecker__ = 'no-shadowbuiltin'
@@ -70,6 +80,11 @@ class CommandOptionParser(optparse.OptionParser):
         if file is None:
             file = self._stdout
         file.write(self.format_help())
+        self.help_printed = True
+
+    def print_usage(self, file=None):
+        optparse.OptionParser.print_usage(self, file)
+        self.usage_printed = True
 
     def exit(self, status=0, msg=None):
         if msg:
@@ -90,6 +105,8 @@ class Command:
     @cvar description: longer paragraph explaining the command
     @cvar subCommands: dict of name -> commands below this command
     @type subCommands: dict of str  -> L{Command}
+    @cvar parser:      the option parser used for parsing
+    @type parser:      L{OptionParser}
     """
     name = None
     aliases = None
@@ -100,6 +117,7 @@ class Command:
     subCommands = None
     subCommandClasses = None
     aliasedSubCommands = None
+    parser = None
 
     def __init__(self, parentCommand=None, stdout=sys.stdout,
         stderr=sys.stderr):
@@ -189,6 +207,11 @@ class Command:
         # note: no arguments should be passed as an empty list, not a list
         # with an empty str as ''.split(' ') returns
         self.options, args = self.parser.parse_args(argv)
+        self.debug('parse_args called')
+
+        # if we were asked to print help or usage, we are done
+        if self.parser.usage_printed or self.parser.help_printed:
+            return 0
 
         # FIXME: make handleOptions not take options, since we store it
         # in self.options now
@@ -249,10 +272,17 @@ class Command:
         self.parser.print_usage(file=self.stderr)
         return 1
 
+    def handleOptions(self, options):
+        """
+        Handle the parsed options.
+        """
+        pass
+
     def outputHelp(self):
         """
         Output help information.
         """
+        self.debug('outputHelp')
         self.parser.print_help(file=self.stderr)
 
     def outputUsage(self):
@@ -260,13 +290,8 @@ class Command:
         Output usage information.
         Used when the options or arguments were missing or wrong.
         """
+        self.debug('outputUsage')
         self.parser.print_usage(file=self.stderr)
-
-    def handleOptions(self, options):
-        """
-        Handle the parsed options.
-        """
-        pass
 
     def getRootCommand(self):
         """
@@ -276,3 +301,9 @@ class Command:
         while c.parentCommand:
             c = c.parentCommand
         return c
+
+    def debug(self, format, *args):
+        """
+        Override me to handle debug output from this class.
+        """
+        pass

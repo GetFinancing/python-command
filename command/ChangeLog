@@ -1,3 +1,10 @@
+2008-05-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  add OptionParser.{help,usage}_printed so that Command subclasses
+	  that override parse can exit properly as soon as help or usage
+	  is printed.
+
 2008-05-12  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
