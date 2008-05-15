@@ -52,7 +52,7 @@ class FakeCommandTestCase(unittest.TestCase):
         self.assertEquals(self.c.name, "fakecommand")
 
     def testHelpCommands(self):
-        self.assertRaises(SystemExit, self.c.parse, ['--help', ])
+        self.assertEquals(0, self.c.parse(['--help', ]))
         lookFor = "%s  " % self.c.subCommands.keys()[0]
         self.failUnless(self.out.getvalue().find(lookFor) > -1,
             "out %r does not contain %s" % (self.out.getvalue(), lookFor))
@@ -75,7 +75,7 @@ class FakeSubCommandTestCase(unittest.TestCase):
         self.assertEquals(self.c.name, "fakesubcommand")
 
     def testHelpCommands(self):
-        self.assertRaises(SystemExit, self.c.parse, ['--help', ])
+        self.assertEquals(0, self.c.parse(['--help', ]))
         lookFor = "%s  " % self.c.subCommands.keys()[0]
         self.failUnless(self.out.getvalue().find(lookFor) > -1,
             "out %r does not contain %s" % (self.out.getvalue(), lookFor))

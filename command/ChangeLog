@@ -1,5 +1,10 @@
 2008-05-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* test_command.py:
+	  Fix test after we made exit stop raising SystemExit
+
+2008-05-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* command.py:
 	  add OptionParser.{help,usage}_printed so that Command subclasses
 	  that override parse can exit properly as soon as help or usage
