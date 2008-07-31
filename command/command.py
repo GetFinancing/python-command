@@ -95,7 +95,8 @@ class Command:
     I am a class that handles a command for a program.
     Commands can be nested underneath a command for further processing.
 
-    @cvar name:        name of the command, lowercase
+    @cvar name:        name of the command, lowercase;
+                       defaults to the lowercase version of the class name
     @cvar aliases:     list of alternative lowercase names recognized
     @type aliases:     list of str
     @cvar usage:       short one-line usage string;
@@ -202,7 +203,7 @@ class Command:
         @type  argv: list of str
 
         @rtype:   int
-        @returns: an exit code
+        @returns: an exit code, or None if no actual action was taken.
         """
         # note: no arguments should be passed as an empty list, not a list
         # with an empty str as ''.split(' ') returns
@@ -211,7 +212,7 @@ class Command:
 
         # if we were asked to print help or usage, we are done
         if self.parser.usage_printed or self.parser.help_printed:
-            return 0
+            return None
 
         # FIXME: make handleOptions not take options, since we store it
         # in self.options now
