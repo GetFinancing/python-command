@@ -10,6 +10,7 @@ Command class.
 import optparse
 import sys
 
+
 class CommandHelpFormatter(optparse.IndentedHelpFormatter):
     """
     I format the description as usual, but add an overview of commands
@@ -23,6 +24,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
         self._commands[name] = description
 
     ### override parent method
+
     def format_description(self, description):
         # textwrap doesn't allow for a way to preserve double newlines
         # to separate paragraphs, so we do it here.
@@ -47,6 +49,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
                 commandDesc.append(format % (name, self._commands[name]))
             ret += "\n" + "\n".join(commandDesc) + "\n"
         return ret
+
 
 class CommandOptionParser(optparse.OptionParser):
     """
@@ -74,6 +77,7 @@ class CommandOptionParser(optparse.OptionParser):
     # we're overriding the built-in file, but we need to since this is
     # the signature from the base class
     __pychecker__ = 'no-shadowbuiltin'
+
     def print_help(self, file=None):
         # we are overriding a parent method so we can't do anything about file
         __pychecker__ = 'no-shadowbuiltin'
@@ -89,6 +93,7 @@ class CommandOptionParser(optparse.OptionParser):
     def exit(self, status=0, msg=None):
         if msg:
             sys.stderr.write(msg)
+
 
 class Command:
     """

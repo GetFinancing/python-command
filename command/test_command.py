@@ -33,19 +33,24 @@ class CommandTestCase(unittest.TestCase):
         c = command.Command()
         self.assertEquals(c.name, "command")
 
+
 class FakeSubSubCommand(command.Command):
     description = "Fake subsubcommand"
     aliases = "fssc"
+
 
 class FakeSubCommand(command.Command):
     description = "Fake subcommand"
     subCommandClasses = [FakeSubSubCommand, ]
 
+
 class FakeCommand(command.Command):
     description = "Fake command"
     subCommandClasses = [FakeSubCommand, ]
 
+
 class FakeCommandTestCase(unittest.TestCase):
+
     def setUp(self):
         unittest.TestCase.setUp(self)
         self.out = StringIO.StringIO()
