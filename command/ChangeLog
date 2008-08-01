@@ -1,3 +1,11 @@
+2008-08-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	patch by: Johan Dahlin
+
+	* command.py:
+	* test_command.py:
+	  Clean up with pep8.py
+
 2008-07-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:

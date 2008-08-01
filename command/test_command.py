@@ -25,8 +25,10 @@ import unittest
 import StringIO
 
 import command
-  
+
+
 class CommandTestCase(unittest.TestCase):
+
     def testCommandNoName(self):
         c = command.Command()
         self.assertEquals(c.name, "command")
@@ -65,8 +67,10 @@ class FakeCommandTestCase(unittest.TestCase):
         out = self.err.getvalue()
         self.failUnless(out[1:].startswith('sage:'),
             "output %s does not start with U/usage" % out)
-        
+
+
 class FakeSubCommandTestCase(unittest.TestCase):
+
     def setUp(self):
         unittest.TestCase.setUp(self)
         self.out = StringIO.StringIO()
