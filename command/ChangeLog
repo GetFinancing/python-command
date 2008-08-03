@@ -1,3 +1,8 @@
+2008-08-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* test_command.py:
+	  Fix test.
+
 2008-08-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	patch by: Johan Dahlin
