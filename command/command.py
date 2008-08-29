@@ -179,6 +179,7 @@ class Command:
 
         # create our parser
         description = self.description or self.summary
+        description = description.strip()
         self.parser = CommandOptionParser(
             usage=usage, description=description,
             formatter=formatter)
