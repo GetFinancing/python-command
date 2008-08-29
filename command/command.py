@@ -106,7 +106,9 @@ class Command:
     @type aliases:     list of str
     @cvar usage:       short one-line usage string;
                        %command gets expanded to a sub-command or [commands]
-                       as appropriate
+                       as appropriate.  Don't specify the command name itself,
+                       it will be added automatically.  If not set, defaults
+                       to name.
     @cvar summary:     short one-line summary of the command
     @cvar description: longer paragraph explaining the command
     @cvar subCommands: dict of name -> commands below this command
@@ -157,7 +159,17 @@ class Command:
                     command.description)
 
         # expand %command for the bottom usage
-        usage = self.usage or self.name
+        usage = self.usage or ''
+        if not usage:
+            # if no usage, but subcommands, then default to showing that
+            if self.subCommands:
+                usage = "%command"
+
+        # the main program name shouldn't get prepended, because %prog
+        # already expands to the name
+        if not usage.startswith('%prog'):
+            usage = self.name + ' ' + usage
+
         if usage.find("%command") > -1:
             usage = usage.split("%command")[0] + '[command]'
         usages = [usage, ]
@@ -179,7 +191,8 @@ class Command:
 
         # create our parser
         description = self.description or self.summary
-        description = description.strip()
+        if description:
+            description = description.strip()
         self.parser = CommandOptionParser(
             usage=usage, description=description,
             formatter=formatter)

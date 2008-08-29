@@ -1,3 +1,9 @@
+2008-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Change usage to not include the own name.  This allows us
+	  to do the right default thing for commands with subcommands.
+
 2008-08-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* test_command.py:
