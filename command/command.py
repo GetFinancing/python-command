@@ -114,7 +114,7 @@ class Command:
     @cvar subCommands: dict of name -> commands below this command
     @type subCommands: dict of str  -> L{Command}
     @cvar parser:      the option parser used for parsing
-    @type parser:      L{OptionParser}
+    @type parser:      L{optparse.OptionParser}
     """
     name = None
     aliases = None

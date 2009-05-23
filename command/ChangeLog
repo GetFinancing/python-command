@@ -1,3 +1,8 @@
+2009-05-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Fix reference in docstring.
+
 2008-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
