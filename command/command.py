@@ -266,8 +266,12 @@ class Command:
         if not self.subCommands:
             try:
                 ret = self.do(args)
+            except CommandOk, e:
+                ret = e.status
+                self.stdout.write(e.output + '\n')
             except CommandExited, e:
                 ret = e.status
+                self.stderr.write(e.output + '\n')
 
             # if everything's fine, we return 0
             if not ret:
@@ -332,16 +336,16 @@ class Command:
         pass
 
 class CommandExited(Exception):
-    def __init__(self, status, message):
-        self.args = (status, message)
+    def __init__(self, status, output):
+        self.args = (status, output)
         self.status = status
-        self.message = message
+        self.output = output
 
 class CommandOk(CommandExited):
-    def __init__(self, message):
-        CommandExited.__init__(self, 0, message)
+    def __init__(self, output):
+        CommandExited.__init__(self, 0, output)
 
 class CommandError(CommandExited):
-    def __init__(self, message):
-        CommandExited.__init__(self, 3, message)
+    def __init__(self, output):
+        CommandExited.__init__(self, 3, output)
 

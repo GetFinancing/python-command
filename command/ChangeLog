@@ -1,6 +1,12 @@
 2009-06-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  BaseException.message existed and is deprecated, so rename.
+	  Also output the output in the exception.
+
+2009-06-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Add CommandExited and subclasses, so we can have a
 	  common subclass for command classes that start their
 	  do() method with the same code to check arguments/conditions,
