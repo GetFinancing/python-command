@@ -1,3 +1,11 @@
+2009-06-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Add CommandExited and subclasses, so we can have a
+	  common subclass for command classes that start their
+	  do() method with the same code to check arguments/conditions,
+	  then raise if they don't.
+
 2009-05-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:

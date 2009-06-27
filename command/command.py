@@ -264,7 +264,10 @@ class Command:
 
         # if we don't have subcommands, defer to our do() method
         if not self.subCommands:
-            ret = self.do(args)
+            try:
+                ret = self.do(args)
+            except CommandExited, e:
+                ret = e.status
 
             # if everything's fine, we return 0
             if not ret:
@@ -327,3 +330,18 @@ class Command:
         Override me to handle debug output from this class.
         """
         pass
+
+class CommandExited(Exception):
+    def __init__(self, status, message):
+        self.args = (status, message)
+        self.status = status
+        self.message = message
+
+class CommandOk(CommandExited):
+    def __init__(self, message):
+        CommandExited.__init__(self, 0, message)
+
+class CommandError(CommandExited):
+    def __init__(self, message):
+        CommandExited.__init__(self, 3, message)
+
