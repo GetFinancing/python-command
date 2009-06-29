@@ -24,8 +24,8 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
         self._commands[name] = description
 
     ### override parent method
-
     def format_description(self, description):
+
         # textwrap doesn't allow for a way to preserve double newlines
         # to separate paragraphs, so we do it here.
         blocks = description.split('\n\n')
@@ -45,8 +45,8 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
                 if len(key) > length:
                     length = len(key)
             for name in keys:
-                format = "  %-" + "%d" % length + "s  %s"
-                commandDesc.append(format % (name, self._commands[name]))
+                formatString = "  %-" + "%d" % length + "s  %s"
+                commandDesc.append(formatString % (name, self._commands[name]))
             ret += "\n" + "\n".join(commandDesc) + "\n"
         return ret
 
@@ -93,6 +93,8 @@ class CommandOptionParser(optparse.OptionParser):
     def exit(self, status=0, msg=None):
         if msg:
             sys.stderr.write(msg)
+
+        return status
 
 
 class Command:
