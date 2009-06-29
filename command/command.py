@@ -24,6 +24,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
         self._commands[name] = description
 
     ### override parent method
+
     def format_description(self, description):
 
         # textwrap doesn't allow for a way to preserve double newlines
@@ -337,17 +338,22 @@ class Command:
         """
         pass
 
+
 class CommandExited(Exception):
+
     def __init__(self, status, output):
         self.args = (status, output)
         self.status = status
         self.output = output
 
+
 class CommandOk(CommandExited):
+
     def __init__(self, output):
         CommandExited.__init__(self, 0, output)
 
+
 class CommandError(CommandExited):
+
     def __init__(self, output):
         CommandExited.__init__(self, 3, output)
-
