@@ -25,7 +25,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 
     ### override parent method
 
-    def format_description(self, description):
+    def format_description(self, description, width=None):
 
         # textwrap doesn't allow for a way to preserve double newlines
         # to separate paragraphs, so we do it here.
@@ -38,7 +38,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
         ret = "\n".join(rets)
         if self._commands:
             commandDesc = []
-            commandDesc.append("commands:")
+            commandDesc.append("Commands:")
             keys = self._commands.keys()
             keys.sort()
             length = 0
@@ -131,7 +131,7 @@ class Command:
     parser = None
 
     def __init__(self, parentCommand=None, stdout=sys.stdout,
-        stderr=sys.stderr):
+        stderr=sys.stderr, width=None):
         """
         Create a new command instance, with the given parent.
         Allows for redirecting stdout and stderr if needed.
@@ -148,14 +148,14 @@ class Command:
         self.aliasedSubCommands = {}
         if self.subCommandClasses:
             for C in self.subCommandClasses:
-                c = C(self, stdout=stdout, stderr=stderr)
+                c = C(self, stdout=stdout, stderr=stderr, width=width)
                 self.subCommands[c.name] = c
                 if c.aliases:
                     for alias in c.aliases:
                         self.aliasedSubCommands[alias] = c
 
         # create our formatter and add subcommands if we have them
-        formatter = CommandHelpFormatter()
+        formatter = CommandHelpFormatter(width=width)
         if self.subCommands:
             for name, command in self.subCommands.items():
                 formatter.addCommand(name, command.summary or
@@ -308,20 +308,26 @@ class Command:
         """
         pass
 
-    def outputHelp(self):
+    def outputHelp(self, file=None):
         """
         Output help information.
         """
+        __pychecker__ = 'no-shadowbuiltin'
         self.debug('outputHelp')
-        self.parser.print_help(file=self.stderr)
+        if not file:
+            file = self.stderr
+        self.parser.print_help(file=file)
 
-    def outputUsage(self):
+    def outputUsage(self, file=None):
         """
         Output usage information.
         Used when the options or arguments were missing or wrong.
         """
+        __pychecker__ = 'no-shadowbuiltin'
         self.debug('outputUsage')
-        self.parser.print_usage(file=self.stderr)
+        if not file:
+            file = self.stderr
+        self.parser.print_usage(file=file)
 
     def getRootCommand(self):
         """
@@ -337,6 +343,15 @@ class Command:
         Override me to handle debug output from this class.
         """
         pass
+
+    def getFullName(self):
+        names = []
+        c = self
+        while c:
+            names.append(c.name)
+            c = c.parentCommand
+        names.reverse()
+        return " ".join(names)
 
 
 class CommandExited(Exception):

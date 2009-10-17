@@ -1,3 +1,12 @@
+2009-10-17  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Add getFullName method, to give you the full command name (with
+	  parent commands).
+	  Add file parameters to usage and help output, so we can redirect
+	  somewhere else.  Also add a width parameter to control the width
+	  of that output.
+
 2009-06-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
