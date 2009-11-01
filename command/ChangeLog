@@ -1,6 +1,12 @@
 2009-11-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  Allow natural formatting of a list, identified by a line that
+	  starts with a space then a dash.
+
+2009-11-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Add aliases to the interpreter as well.
 
 2009-11-01  Thomas Vander Stichele  <thomas at apestaart dot org>

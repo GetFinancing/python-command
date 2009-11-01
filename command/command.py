@@ -32,15 +32,22 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
     ### override parent method
 
     def format_description(self, description, width=None):
-
         # textwrap doesn't allow for a way to preserve double newlines
         # to separate paragraphs, so we do it here.
-        blocks = description.split('\n\n')
+        paragraphs = description.split('\n\n')
+        print paragraphs
         rets = []
 
-        for block in blocks:
-            rets.append(optparse.IndentedHelpFormatter.format_description(self,
-                block))
+        for paragraph in paragraphs:
+            # newlines starting with a space/dash are treated as a table, ie as
+            # is
+            lines = paragraph.split('\n -')
+            formatted = []
+            for line in lines:
+                formatted.append(optparse.IndentedHelpFormatter.format_description(self,
+                line))
+            rets.append(" -".join(formatted))
+
         ret = "\n".join(rets)
 
         # add aliases
