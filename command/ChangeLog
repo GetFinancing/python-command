@@ -1,6 +1,11 @@
 2009-11-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  Add aliases to the interpreter as well.
+
+2009-11-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Allow a command with subcommands to implement a specific do()
 	  as well if no arguments are given.
 

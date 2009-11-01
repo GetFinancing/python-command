@@ -17,11 +17,17 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
     after it if there are any, formatted like the options.
     """
     _commands = None
+    _aliases = None
 
     def addCommand(self, name, description):
         if self._commands is None:
             self._commands = {}
         self._commands[name] = description
+
+    def addAlias(self, alias):
+        if self._aliases is None:
+            self._aliases = []
+        self._aliases.append(alias)
 
     ### override parent method
 
@@ -36,6 +42,12 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
             rets.append(optparse.IndentedHelpFormatter.format_description(self,
                 block))
         ret = "\n".join(rets)
+
+        # add aliases
+        if self._aliases:
+            ret += "\nAliases: " + ", ".join(self._aliases) + "\n"
+
+        # add subcommands
         if self._commands:
             commandDesc = []
             commandDesc.append("Commands:")
@@ -161,6 +173,10 @@ class Command:
                 formatter.addCommand(name, command.summary or
                     command.description)
 
+        if self.aliases:
+            for alias in self.aliases:
+                formatter.addAlias(alias)
+
         # expand %command for the bottom usage
         usage = self.usage or ''
         if not usage:
@@ -215,7 +231,9 @@ class Command:
         """
         Override me to implement the functionality of the command.
         """
-        pass
+        raise NotImplementedError('Implement %s.do()' % self.__class__)
+        # by default, return 1 and hopefully show help
+        return 1
 
     def parse(self, argv):
         """
@@ -278,6 +296,11 @@ class Command:
             except CommandExited, e:
                 ret = e.status
                 self.stderr.write(e.output + '\n')
+            except NotImplementedError:
+                self.parser.print_usage(file=self.stderr)
+                self.stderr.write(
+                    "Use --help to get a list of commands.\n")
+                return 1
 
             # if everything's fine, we return 0
             if not ret:
@@ -393,6 +416,7 @@ def commandToCmd(command):
     import cmd
 
     # internal class to subclass cmd.Cmd with a Ctrl-D handler
+
     class CommandCmd(cmd.Cmd):
         prompt = '(command) '
         exited = False
@@ -409,19 +433,23 @@ def commandToCmd(command):
         def help_EOF(self):
             print 'Exit.'
 
-        help_exit = help_EOF
+        def help_exit(self):
+            print 'Exit.'
 
     # populate the Cmd interpreter from our command class
     cmdClass = CommandCmd
 
-    for name, command in command.subCommands.items():
+    for name, command in command.subCommands.items() \
+        + command.aliasedSubCommands.items():
         if name == 'shell':
             continue
         command.debug('Adding shell command %s for %r' % (name, command))
 
         # add do command
         methodName = 'do_' + name
-        def generate(command):
+
+        def generateDo(command):
+
             def do_(s, line):
                 # the do_ method is passed a single argument consisting of
                 # the remainder of the line
@@ -429,16 +457,21 @@ def commandToCmd(command):
                 command.debug('Asking %r to parse %r' % (command, args))
                 command.parse(args)
             return do_
-        method = generate(command)
+
+        method = generateDo(command)
         setattr(cmdClass, methodName, method)
+
 
         # add help command
         methodName = 'help_' + name
-        def generate(command):
+
+        def generateHelp(command):
+
             def help_(s):
                 command.parser.print_help(file=command.stdout)
             return help_
-        method = generate(command)
+
+        method = generateHelp(command)
         setattr(cmdClass, methodName, method)
 
     return cmdClass()
