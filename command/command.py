@@ -265,8 +265,11 @@ class Command:
             # command
             args = [args[1], args[0]]
 
-        # if we don't have subcommands, defer to our do() method
-        if not self.subCommands:
+        # if we don't have args or don't have subcommands,
+        # defer to our do() method
+        # allows implementing a do() for commands that also have subcommands
+        if not args or not self.subCommands:
+            self.debug('no args or no subcommands, doing')
             try:
                 ret = self.do(args)
             except CommandOk, e:
@@ -372,3 +375,70 @@ class CommandError(CommandExited):
 
     def __init__(self, output):
         CommandExited.__init__(self, 3, output)
+
+
+def commandToCmd(command):
+    """
+    Take a Command instance and create a L{cmd.Cmd} class from it that
+    implements a command line interpreter.
+
+    Example use in a command:
+
+    >>> def do(self, args):
+    ...     cmd = command.commandToCmd(self)
+    ...     cmd.prompt = 'prompt> '
+    ...     while not cmd.exited:
+    ...         cmd.cmdloop()
+    """
+    import cmd
+
+    # internal class to subclass cmd.Cmd with a Ctrl-D handler
+    class CommandCmd(cmd.Cmd):
+        prompt = '(command) '
+        exited = False
+
+        def do_EOF(self, args):
+            self.stdout.write('\n')
+            self.exited = True
+            sys.exit(0)
+
+        def do_exit(self, args):
+            self.exited = True
+            sys.exit(0)
+
+        def help_EOF(self):
+            print 'Exit.'
+
+        help_exit = help_EOF
+
+    # populate the Cmd interpreter from our command class
+    cmdClass = CommandCmd
+
+    for name, command in command.subCommands.items():
+        if name == 'shell':
+            continue
+        command.debug('Adding shell command %s for %r' % (name, command))
+
+        # add do command
+        methodName = 'do_' + name
+        def generate(command):
+            def do_(s, line):
+                # the do_ method is passed a single argument consisting of
+                # the remainder of the line
+                args = line.split(' ')
+                command.debug('Asking %r to parse %r' % (command, args))
+                command.parse(args)
+            return do_
+        method = generate(command)
+        setattr(cmdClass, methodName, method)
+
+        # add help command
+        methodName = 'help_' + name
+        def generate(command):
+            def help_(s):
+                command.parser.print_help(file=command.stdout)
+            return help_
+        method = generate(command)
+        setattr(cmdClass, methodName, method)
+
+    return cmdClass()
