@@ -1,3 +1,8 @@
+2009-11-02  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Fix pep8 error.
+
 2009-11-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:

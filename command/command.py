@@ -44,8 +44,9 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
             lines = paragraph.split('\n -')
             formatted = []
             for line in lines:
-                formatted.append(optparse.IndentedHelpFormatter.format_description(self,
-                line))
+                formatted.append(
+                    optparse.IndentedHelpFormatter.format_description(
+                        self, line))
             rets.append(" -".join(formatted))
 
         ret = "\n".join(rets)
