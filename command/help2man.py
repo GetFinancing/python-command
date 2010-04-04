@@ -47,8 +47,6 @@ def main():
     top = __import__(im)
     obj = top
     for n in names[1:]:
-        print obj
-        print dir(obj)
         obj = getattr(obj, n)
     
     # ugly hack so that help output uses first argument for %prog instead of
