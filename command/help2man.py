@@ -28,8 +28,6 @@ import pickle
 import shutil
 import StringIO
 
-from morituri.rip import main
-
 def walk(command, level=0):
     # print "%s%s: %s" % (" " * level, command.name, command.summary)
     for name, c in command.subCommands.items():
@@ -57,14 +55,26 @@ def manwalk(command):
 
     return ret
 
-# ugly hack so that help output uses first argument for %prog instead of
-# 'doc.py'
-if len(sys.argv) > 1:
-    sys.argv[0] = sys.argv[1]
+def main():
+    # inspired by twisted.python.reflect.namedAny
+    names = sys.argv[1].split('.')
+    im = ".".join(names[:-1])
+    top = __import__(im)
+    obj = top
+    for n in names[1:]:
+        print obj
+        print dir(obj)
+        obj = getattr(obj, n)
+    
+    # ugly hack so that help output uses first argument for %prog instead of
+    # 'doc.py'
+    sys.argv[0] = sys.argv[2]
 
 
-man = []
-man.append('.TH "rip" "1" "October 2009"')
-man.extend(manwalk(main.Rip(width=70)))
+    man = []
+    man.append('.TH "rip" "1" "October 2009"')
+    man.extend(manwalk(obj(width=70)))
 
-print "\n".join(man)
+    print "\n".join(man)
+
+main()
