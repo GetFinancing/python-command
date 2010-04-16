@@ -60,4 +60,5 @@ def main():
 
     print "\n".join(man)
 
-main()
+if __name__ == '__main__':
+    main()
