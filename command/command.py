@@ -16,6 +16,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
     I format the description as usual, but add an overview of commands
     after it if there are any, formatted like the options.
     """
+
     _commands = None
     _aliases = None
 

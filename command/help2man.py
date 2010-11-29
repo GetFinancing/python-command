@@ -5,18 +5,15 @@
 
 # Copyright (C) 2009 Thomas Vander Stichele
 
-import os
 import sys
-import optparse
-import tempfile
-import pickle
-import shutil
 import StringIO
+
 
 def walk(command, level=0):
     # print "%s%s: %s" % (" " * level, command.name, command.summary)
     for name, c in command.subCommands.items():
         walk(c, level + 2)
+
 
 def manwalk(command):
     ret = []
@@ -40,6 +37,7 @@ def manwalk(command):
 
     return ret
 
+
 def main():
     # inspired by twisted.python.reflect.namedAny
     names = sys.argv[1].split('.')
@@ -48,7 +46,7 @@ def main():
     obj = top
     for n in names[1:]:
         obj = getattr(obj, n)
-    
+
     # ugly hack so that help output uses first argument for %prog instead of
     # 'doc.py'
     sys.argv[0] = sys.argv[2]

@@ -1,3 +1,9 @@
+2010-11-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	* help2man.py:
+	  pep-8 and pychecker fixes.
+
 2009-11-02  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
