@@ -460,6 +460,11 @@ def commandToCmd(command):
         def generateDo(command):
 
             def do_(s, line):
+                # line is coming from a terminal; usually it is a utf-8 encoded
+                # string.
+                # Instead of making every Command subclass implement do with
+                # unicode decoding, we do it here.
+                line = line.decode('utf-8')
                 # the do_ method is passed a single argument consisting of
                 # the remainder of the line
                 args = line.split(' ')

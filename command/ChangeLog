@@ -1,3 +1,10 @@
+2011-01-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Input from the command loop is coming from the terminal.
+	  Most likely it is utf-8-encoded, so decode it to unicode before
+	  invoking do.
+
 2010-11-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
