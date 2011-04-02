@@ -287,18 +287,26 @@ class CmdManhole(Manhole):
         from twisted.internet import reactor
         reactor.stop()
 
+# we do not want loseConnection to self.reset() and clear the screen
+class CmdServerProtocol(ServerProtocol):
+    def loseConnection(self):
+        self.transport.loseConnection()
+
 def runWithProtocol(klass):
     fd = sys.__stdin__.fileno()
     oldSettings = termios.tcgetattr(fd)
     tty.setraw(fd)
     try:
-        p = ServerProtocol(klass)
+        p = CmdServerProtocol(klass)
         stdio.StandardIO(p)
         from twisted.internet import reactor
         reactor.run()
     finally:
-        termios.tcsetattr(fd, termios.TCSANOW, oldSettings)
-        os.write(fd, "\r\x1bc\r")
+        os.system('stty sane')
+        # we did not actually carriage return the ended prompt
+        print
+        #termios.tcsetattr(fd, termios.TCSANOW, oldSettings)
+        #os.write(fd, "\r\x1bc\r")
 
 
 if __name__ == '__main__':
