@@ -470,6 +470,7 @@ def commandToCmdClass(command):
                 args = line.split(' ')
                 command.debug('Asking %r to parse %r' % (command, args))
                 command.stdout = s.stdout
+                command.stderr = s.stdout
                 command.parse(args)
             return do_
 
@@ -483,7 +484,7 @@ def commandToCmdClass(command):
         def generateHelp(command):
 
             def help_(s):
-                command.parser.print_help(file=command.stdout)
+                command.parser.print_help(file=s.stdout)
             return help_
 
         method = generateHelp(command)

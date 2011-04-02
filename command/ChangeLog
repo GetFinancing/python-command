@@ -1,6 +1,11 @@
 2011-04-02  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  Fix more wrong stdout redirection.
+
+2011-04-02  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Add commandToCmdClass as the preferred interface.
 
 2011-04-02  Thomas Vander Stichele  <thomas at apestaart dot org>
