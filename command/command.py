@@ -409,7 +409,7 @@ class CommandError(CommandExited):
         CommandExited.__init__(self, 3, output)
 
 
-def commandToCmd(command):
+def commandToCmdClass(command):
     """
     Take a Command instance and create a L{cmd.Cmd} class from it that
     implements a command line interpreter.
@@ -417,7 +417,7 @@ def commandToCmd(command):
     Example use in a command:
 
     >>> def do(self, args):
-    ...     cmd = command.commandToCmd(self)
+    ...     cmd = command.commandToCmdClass(self)()
     ...     cmd.prompt = 'prompt> '
     ...     while not cmd.exited:
     ...         cmd.cmdloop()
@@ -469,6 +469,7 @@ def commandToCmd(command):
                 # the remainder of the line
                 args = line.split(' ')
                 command.debug('Asking %r to parse %r' % (command, args))
+                command.stdout = s.stdout
                 command.parse(args)
             return do_
 
@@ -488,4 +489,8 @@ def commandToCmd(command):
         method = generateHelp(command)
         setattr(cmdClass, methodName, method)
 
-    return cmdClass()
+    return cmdClass
+
+def commandToCmd(command):
+    # for compatibility reasons
+    return commandToCmdClass(command)()
