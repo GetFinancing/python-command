@@ -465,6 +465,7 @@ def commandToCmdClass(command):
 
     # populate the Cmd interpreter from our command class
     cmdClass = CommandCmd
+    cmdClass.command = command
 
     for name, subCommand in command.subCommands.items() \
         + command.aliasedSubCommands.items():

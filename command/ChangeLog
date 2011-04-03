@@ -1,6 +1,13 @@
 2011-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  Set cmdClass.command properly.
+	* manholecmd.py:
+	  Make sure we set stdout on the root command, so it trickles down.
+
+2011-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Fixed wrong parse delegation.
 	  Make stderr a property too for now.
 	  Don't set too many stdout/stderr.

@@ -274,6 +274,9 @@ class CmdInterpreter(Interpreter):
         assert type(line) is not unicode
         # now we have self.handler.terminal
         self._cmd = self.cmdClass(stdout=self.handler.terminal)
+        # set stdout on the root command too
+        # FIXME: pokes in internals
+        self._cmd.command.getRootCommand()._stdout = self.handler.terminal
         self._cmd.onecmd(line)
         
 
