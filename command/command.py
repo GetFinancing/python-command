@@ -255,9 +255,9 @@ class Command:
         """
         # note: no arguments should be passed as an empty list, not a list
         # with an empty str as ''.split(' ') returns
-        self.debug('calling parse_args')
+        self.debug('calling %r.parse_args' % self)
         self.options, args = self.parser.parse_args(argv)
-        self.debug('called parse_args')
+        self.debug('called %r.parse_args' % self)
 
         # if we were asked to print help or usage, we are done
         if self.parser.usage_printed or self.parser.help_printed:
@@ -403,6 +403,8 @@ class Command:
         return self.parentCommand.stdout
 
     stdout = property(_getStdout)
+    # FIXME: do we want a separate one ?
+    stderr = property(_getStdout)
 
 class CommandExited(Exception):
 
@@ -468,8 +470,7 @@ def commandToCmdClass(command):
         + command.aliasedSubCommands.items():
         if name == 'shell':
             continue
-        subCommand.stdout = command.stdout
-        command.debug('Adding shell command %s for %r with stdout %r' % (name, subCommand, subCommand.stdout))
+        command.debug('Adding shell command %s for %r' % (name, subCommand))
 
         # add do command
         methodName = 'do_' + name
@@ -486,9 +487,7 @@ def commandToCmdClass(command):
                 # the remainder of the line
                 args = line.split(' ')
                 command.debug('Asking %r to parse %r' % (c, args))
-                c.stdout = s.stdout
-                c.stderr = s.stdout
-                command.parse(args)
+                c.parse(args)
             return do_
 
         method = generateDo(subCommand)

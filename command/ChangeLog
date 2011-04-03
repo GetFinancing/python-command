@@ -1,6 +1,13 @@
 2011-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  Fixed wrong parse delegation.
+	  Make stderr a property too for now.
+	  Don't set too many stdout/stderr.
+
+2011-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Don't set stdout/stderr by default.
 	  Make stdout a property; have commands delegate upwards if not set.
 	  Encode utf-8 commands for output.
