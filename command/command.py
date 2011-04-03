@@ -150,8 +150,8 @@ class Command:
     aliasedSubCommands = None
     parser = None
 
-    def __init__(self, parentCommand=None, stdout=sys.stdout,
-        stderr=sys.stderr, width=None):
+    def __init__(self, parentCommand=None, stdout=None,
+        stderr=None, width=None):
         """
         Create a new command instance, with the given parent.
         Allows for redirecting stdout and stderr if needed.
@@ -159,8 +159,8 @@ class Command:
         """
         if not self.name:
             self.name = str(self.__class__).split('.')[-1].lower()
-        self.stdout = stdout
-        self.stderr = stderr
+        self._stdout = stdout
+        self._stderr = stderr
         self.parentCommand = parentCommand
 
         # create subcommands if we have them
@@ -248,7 +248,7 @@ class Command:
         Parse the given arguments and act on them.
 
         @param argv: list of arguments to parse
-        @type  argv: list of str
+        @type  argv: list of unicode
 
         @rtype:   int
         @returns: an exit code, or None if no actual action was taken.
@@ -281,7 +281,7 @@ class Command:
             # complain if we were asked for help on a subcommand, but we don't
             # have any
             if not self.subCommands:
-                self.stderr.write('No subcommands defined.')
+                self.stderr.write('No subcommands defined.\n')
                 self.parser.print_usage(file=self.stderr)
                 self.stderr.write(
                     "Use --help to get more information about this command.\n")
@@ -326,6 +326,8 @@ class Command:
                 "Use --help to get a list of commands.\n")
             return 1
 
+        # FIXME: check users and enable this
+        # assert type(command) is unicode
         if command in self.subCommands.keys():
             return self.subCommands[command].parse(args[1:])
 
@@ -333,7 +335,7 @@ class Command:
             if command in self.aliasedSubCommands.keys():
                 return self.aliasedSubCommands[command].parse(args[1:])
 
-        self.stderr.write("Unknown command '%s'.\n" % command)
+        self.stderr.write("Unknown command '%s'.\n" % command.encode('utf-8'))
         self.parser.print_usage(file=self.stderr)
         return 1
 
@@ -388,6 +390,19 @@ class Command:
         names.reverse()
         return " ".join(names)
 
+    def _getStdout(self):
+        # if set explicitly, use it
+        if self._stdout:
+            return self._stdout
+
+        # if I am the root command, default
+        if not self.parentCommand:
+            return sys.stdout
+
+        # otherwise delegate to my parent
+        return self.parentCommand.stdout
+
+    stdout = property(_getStdout)
 
 class CommandExited(Exception):
 
@@ -429,6 +444,7 @@ def commandToCmdClass(command):
     class CommandCmd(cmd.Cmd):
         prompt = '(command) '
         exited = False
+        command = None # the original Command subclass
 
         def do_EOF(self, args):
             self.stdout.write('\n')
@@ -448,16 +464,17 @@ def commandToCmdClass(command):
     # populate the Cmd interpreter from our command class
     cmdClass = CommandCmd
 
-    for name, command in command.subCommands.items() \
+    for name, subCommand in command.subCommands.items() \
         + command.aliasedSubCommands.items():
         if name == 'shell':
             continue
-        command.debug('Adding shell command %s for %r' % (name, command))
+        subCommand.stdout = command.stdout
+        command.debug('Adding shell command %s for %r with stdout %r' % (name, subCommand, subCommand.stdout))
 
         # add do command
         methodName = 'do_' + name
 
-        def generateDo(command):
+        def generateDo(c):
 
             def do_(s, line):
                 # line is coming from a terminal; usually it is a utf-8 encoded
@@ -468,26 +485,26 @@ def commandToCmdClass(command):
                 # the do_ method is passed a single argument consisting of
                 # the remainder of the line
                 args = line.split(' ')
-                command.debug('Asking %r to parse %r' % (command, args))
-                command.stdout = s.stdout
-                command.stderr = s.stdout
+                command.debug('Asking %r to parse %r' % (c, args))
+                c.stdout = s.stdout
+                c.stderr = s.stdout
                 command.parse(args)
             return do_
 
-        method = generateDo(command)
+        method = generateDo(subCommand)
         setattr(cmdClass, methodName, method)
 
 
         # add help command
         methodName = 'help_' + name
 
-        def generateHelp(command):
+        def generateHelp(c):
 
             def help_(s):
                 command.parser.print_help(file=s.stdout)
             return help_
 
-        method = generateHelp(command)
+        method = generateHelp(subCommand)
         setattr(cmdClass, methodName, method)
 
     return cmdClass

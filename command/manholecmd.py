@@ -271,6 +271,7 @@ class CmdInterpreter(Interpreter):
         self.handler.ps = (self._cmd.prompt, '... ')
 
     def push(self, line):
+        assert type(line) is not unicode
         # now we have self.handler.terminal
         self._cmd = self.cmdClass(stdout=self.handler.terminal)
         self._cmd.onecmd(line)

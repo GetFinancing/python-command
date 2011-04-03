@@ -1,3 +1,14 @@
+2011-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Don't set stdout/stderr by default.
+	  Make stdout a property; have commands delegate upwards if not set.
+	  Encode utf-8 commands for output.
+	* manholecmd.py:
+	  Make sure we don't get unicode.
+	  Don't reset and clear the screen when we stop.
+	  System out to stty sane for now.
+
 2011-04-02  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* manholecmd.py:
