@@ -1,5 +1,17 @@
 2011-04-16  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* command.py:
+	  Docs, cleanups.
+	  Actually return the result of the Command.parse invocation
+	  in the do_* handler.
+	* manholecmd.py:
+	  Handle and wait for deferreds from the do_* handler in the
+	  interpreter before showing the next command prompt.
+	  Fix the example you get by running it, and add a defer command
+	  to show the deferred handling.
+
+2011-04-16  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* manholecmd.py:
 	  Factor out terminal resetting methods into a Stdio class.
 	  Fix up example again.

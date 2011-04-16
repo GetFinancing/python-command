@@ -16,7 +16,7 @@ and reasonable handling of Deferreds.
 import code, sys, StringIO, tokenize, termios, tty, os, cmd
 
 from twisted.conch import recvline
-from twisted.internet import stdio
+from twisted.internet import stdio, defer
 
 from twisted.conch.insults.insults import ServerProtocol
 
@@ -251,11 +251,14 @@ class Manhole(recvline.HistoricRecvLine):
                 self._deliverBuffer(oldBuffer)
 
     def lineReceived(self, line):
-        more = self.interpreter.push(line)
-        self.pn = bool(more)
-        if self._needsNewline():
-            self.terminal.nextLine()
-        self.terminal.write(self.ps[self.pn])
+        d = defer.maybeDeferred(self.interpreter.push, line)
+        def cb(more):
+            self.pn = bool(more)
+            if self._needsNewline():
+                self.terminal.nextLine()
+            self.terminal.write(self.ps[self.pn])
+        d.addCallback(cb)
+        return d
 
 # gets instantiated when the first command is entered and passed
 class CmdInterpreter(Interpreter):
@@ -270,14 +273,24 @@ class CmdInterpreter(Interpreter):
         self._cmd = self.cmdClass()
         self.handler.ps = (self._cmd.prompt, '... ')
 
+    # FIXME: integrate into Twisted
     def push(self, line):
+        """
+        This version of push returns a deferred that will fire when the command
+        is done and the interpreter can show the next prompt.
+        """
+        
         assert type(line) is not unicode
         # now we have self.handler.terminal
         self._cmd = self.cmdClass(stdout=self.handler.terminal)
         # set stdout on the root command too
         # FIXME: pokes in internals
-        self._cmd.command.getRootCommand()._stdout = self.handler.terminal
-        self._cmd.onecmd(line)
+        if hasattr(self._cmd, 'command'):
+            self._cmd.command.getRootCommand()._stdout = self.handler.terminal
+        r = self._cmd.onecmd(line)
+        return r
+
+        # push should only return something if it wants a more prompt
 
 class CmdManhole(Manhole):
     interpreterClass = CmdInterpreter
@@ -352,6 +365,19 @@ if __name__ == '__main__':
         def do_test(self, args):
             self.stdout.write('this is a test\n')
 
+        def do_defer(self, args):
+            self.stdout.write('this is a test that returns a deferred\n')
+
+            from twisted.internet import defer
+            d = defer.Deferred()
+            def cb(_):
+                self.stdout.write('the deferred fired\n')
+            d.addCallback(cb)
+
+            from twisted.internet import reactor
+            reactor.callLater(1, d.callback, None)
+
+            return d
 
     class MyCmdInterpreter(CmdInterpreter):
         cmdClass = MyCmd

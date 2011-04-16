@@ -431,8 +431,11 @@ class CommandError(CommandExited):
 
 def commandToCmdClass(command):
     """
+    @type  command: L{Command}
+
     Take a Command instance and create a L{cmd.Cmd} class from it that
-    implements a command line interpreter.
+    implements a command line interpreter, using the commands under the given
+    Command instance as its subcommands.
 
     Example use in a command:
 
@@ -441,15 +444,20 @@ def commandToCmdClass(command):
     ...     cmd.prompt = 'prompt> '
     ...     while not cmd.exited:
     ...         cmd.cmdloop()
+
+    @rtype: L{cmd.Cmd}
     """
     import cmd
 
     # internal class to subclass cmd.Cmd with a Ctrl-D handler
 
-    class CommandCmd(cmd.Cmd):
+    class _CommandWrappingCmd(cmd.Cmd):
         prompt = '(command) '
         exited = False
         command = None # the original Command subclass
+
+        def __repr__(self):
+            return "<_CommandWrappingCmd for Command %r>" % self.command
 
         def do_EOF(self, args):
             self.stdout.write('\n')
@@ -467,7 +475,7 @@ def commandToCmdClass(command):
             print 'Exit.'
 
     # populate the Cmd interpreter from our command class
-    cmdClass = CommandCmd
+    cmdClass = _CommandWrappingCmd
     cmdClass.command = command
 
     for name, subCommand in command.subCommands.items() \
@@ -491,7 +499,7 @@ def commandToCmdClass(command):
                 # the remainder of the line
                 args = line.split(' ')
                 command.debug('Asking %r to parse %r' % (c, args))
-                c.parse(args)
+                return c.parse(args)
             return do_
 
         method = generateDo(subCommand)
