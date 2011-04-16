@@ -238,6 +238,9 @@ class Command:
     def do(self, args):
         """
         Override me to implement the functionality of the command.
+
+        @rtype:   int
+        @returns: an exit code, or None if no actual action was taken.
         """
         raise NotImplementedError('Implement %s.do()' % self.__class__)
         # by default, return 1 and hopefully show help
