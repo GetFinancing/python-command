@@ -278,40 +278,70 @@ class CmdInterpreter(Interpreter):
         # FIXME: pokes in internals
         self._cmd.command.getRootCommand()._stdout = self.handler.terminal
         self._cmd.onecmd(line)
-        
 
 class CmdManhole(Manhole):
     interpreterClass = CmdInterpreter
+
+    def __init__(self, namespace=None, connectionLostDeferred=None):
+        """
+        @param connectionLostDeferred: a deferred that will be fired when
+                                       the connection is lost, with the reason.
+        """
+        Manhole.__init__(self, namespace)
+
+        self.connectionLostDeferred = connectionLostDeferred
 
     def connectionLost(self, reason):
         """
         When the connection is lost, there is nothing more to do.  Stop the
         reactor so that the process can exit.
+
+        Override me for custom behaviour.
         """
-        from twisted.internet import reactor
-        reactor.stop()
+        if not self.connectionLostDeferred:
+            from twisted.internet import reactor
+            reactor.stop()
+        else:
+            self.connectionLostDeferred.callback(reason)
 
 # we do not want loseConnection to self.reset() and clear the screen
 class CmdServerProtocol(ServerProtocol):
     def loseConnection(self):
         self.transport.loseConnection()
 
-def runWithProtocol(klass):
-    fd = sys.__stdin__.fileno()
-    oldSettings = termios.tcgetattr(fd)
-    tty.setraw(fd)
-    try:
-        p = CmdServerProtocol(klass)
+class Stdio(object):
+
+    def setup(self):
+        self._fd = sys.__stdin__.fileno()
+        self._oldSettings = termios.tcgetattr(self._fd)
+        tty.setraw(self._fd)
+
+    def connect(self, klass, *args, **kwargs):
+
+        p = CmdServerProtocol(klass, *args, **kwargs)
         stdio.StandardIO(p)
-        from twisted.internet import reactor
-        reactor.run()
-    finally:
+
+    def teardown(self):
         os.system('stty sane')
         # we did not actually carriage return the ended prompt
         print
-        #termios.tcsetattr(fd, termios.TCSANOW, oldSettings)
-        #os.write(fd, "\r\x1bc\r")
+        termios.tcsetattr(self._fd, termios.TCSANOW, self._oldSettings)
+        # this clears the screen,
+        # but also fixes some problem when editing history lines
+        # ESC c resets terminal
+        #os.write(self._fd, "\r\x1bc\r")
 
+def runWithProtocol(klass, *args, **kwargs):
+    s = Stdio()
+
+    s.setup()
+    try:
+        s.connect(klass, *args, **kwargs)
+
+        from twisted.internet import reactor
+        reactor.run()
+    finally:
+        s.teardown()
 
 if __name__ == '__main__':
     # classes defined in if to not pollute module namespace
