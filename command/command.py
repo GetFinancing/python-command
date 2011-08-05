@@ -158,7 +158,7 @@ class Command:
         This redirection will be passed on to child commands.
         """
         if not self.name:
-            self.name = str(self.__class__).split('.')[-1].lower()
+            self.name = self.__class__.__name__.lower()
         self._stdout = stdout
         self._stderr = stderr
         self.parentCommand = parentCommand

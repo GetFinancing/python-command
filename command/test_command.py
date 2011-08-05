@@ -30,6 +30,12 @@ class CommandTestCase(unittest.TestCase):
         c = command.Command()
         self.assertEquals(c.name, "command")
 
+    def testNewClassCommandNoName(self):
+        class NewCommand(command.Command, object):
+            pass
+
+        c = NewCommand()
+        self.assertEquals(c.name, "newcommand")
 
 class FakeSubSubCommand(command.Command):
     description = "Fake subsubcommand"
