@@ -118,7 +118,7 @@ class CommandOptionParser(optparse.OptionParser):
         return status
 
 
-class Command:
+class Command(object):
     """
     I am a class that handles a command for a program.
     Commands can be nested underneath a command for further processing.
