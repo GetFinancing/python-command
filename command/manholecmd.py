@@ -13,14 +13,12 @@ and reasonable handling of Deferreds.
 @author: Jp Calderone
 """
 
-import code, sys, StringIO, tokenize, termios, tty, os, cmd
+import code, sys, termios, tty, os, cmd
 
 from twisted.conch import recvline
 from twisted.internet import stdio, defer
 
 from twisted.conch.insults.insults import ServerProtocol
-
-from twisted.python.htmlizer import TokenPrinter
 
 class FileWrapper:
     """Minimal write-file-like object.
