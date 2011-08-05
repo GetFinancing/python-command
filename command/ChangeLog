@@ -1,3 +1,27 @@
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	* manholecmd.py:
+	* test_command.py:
+	  PEP8 cleanups.
+
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Since we use properties (introduced in python 2.2), make
+	  Command a new-style class.
+
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	* test_command.py:
+	  Make automatic naming work for new-style classes.
+
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* manholecmd.py:
+	  Remove unused modules.
+
 2011-05-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* test_command.py:

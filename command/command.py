@@ -409,6 +409,7 @@ class Command(object):
     # FIXME: do we want a separate one ?
     stderr = property(_getStdout)
 
+
 class CommandExited(Exception):
 
     def __init__(self, status, output):
@@ -519,6 +520,7 @@ def commandToCmdClass(command):
         setattr(cmdClass, methodName, method)
 
     return cmdClass
+
 
 def commandToCmd(command):
     # for compatibility reasons

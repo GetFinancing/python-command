@@ -13,12 +13,18 @@ and reasonable handling of Deferreds.
 @author: Jp Calderone
 """
 
-import code, sys, termios, tty, os, cmd
+import os
+import sys
+import cmd
+import code
+import termios
+import tty
 
 from twisted.conch import recvline
 from twisted.internet import stdio, defer
 
 from twisted.conch.insults.insults import ServerProtocol
+
 
 class FileWrapper:
     """Minimal write-file-like object.
@@ -44,13 +50,12 @@ class FileWrapper:
 
 
 class Interpreter(object):
+
     def __init__(self, handler, namespace=None):
         self.handler = handler
 
-
     def push(self, line):
         raise NotImplementedError
-
 
 
 class ManholeInterpreter(Interpreter, code.InteractiveInterpreter):
@@ -77,6 +82,7 @@ class ManholeInterpreter(Interpreter, code.InteractiveInterpreter):
         self.resetBuffer()
 
     ### code.InteractiveInterpreter methods
+
     def runcode(self, *a, **kw):
         orighook, sys.displayhook = sys.displayhook, self.displayhook
         try:
@@ -120,6 +126,7 @@ class ManholeInterpreter(Interpreter, code.InteractiveInterpreter):
 
 
     # FIXME: privatize
+
     def displayhook(self, obj):
         self.locals['_'] = obj
         if isinstance(obj, defer.Deferred):
@@ -127,15 +134,17 @@ class ManholeInterpreter(Interpreter, code.InteractiveInterpreter):
             if hasattr(obj, "result"):
                 self.write(repr(obj))
             elif id(obj) in self._pendingDeferreds:
-                self.write("<Deferred #%d>" % (self._pendingDeferreds[id(obj)][0],))
+                self.write("<Deferred #%d>" % (
+                    self._pendingDeferreds[id(obj)][0], ))
             else:
                 d = self._pendingDeferreds
                 k = self.numDeferreds
                 d[id(obj)] = (k, obj)
                 self.numDeferreds += 1
-                obj.addCallbacks(self._cbDisplayDeferred, self._ebDisplayDeferred,
-                                 callbackArgs=(k, obj), errbackArgs=(k, obj))
-                self.write("<Deferred #%d>" % (k,))
+                obj.addCallbacks(
+                    self._cbDisplayDeferred, self._ebDisplayDeferred,
+                    callbackArgs=(k, obj), errbackArgs=(k, obj))
+                self.write("<Deferred #%d>" % (k, ))
         elif obj is not None:
             self.write(repr(obj))
 
@@ -145,7 +154,8 @@ class ManholeInterpreter(Interpreter, code.InteractiveInterpreter):
         return result
 
     def _ebDisplayDeferred(self, failure, k, obj):
-        self.write("Deferred #%d failed: %r" % (k, failure.getErrorMessage()), True)
+        self.write("Deferred #%d failed: %r" % (
+            k, failure.getErrorMessage()), True)
         del self._pendingDeferreds[id(obj)]
         return failure
 
@@ -153,6 +163,7 @@ CTRL_C = '\x03'
 CTRL_D = '\x04'
 CTRL_BACKSLASH = '\x1c'
 CTRL_L = '\x0c'
+
 
 class Manhole(recvline.HistoricRecvLine):
     """Mediator between a fancy line source and an interactive interpreter.
@@ -183,9 +194,9 @@ class Manhole(recvline.HistoricRecvLine):
 
     # FIXME: this was in connectionMade, but why ?
     # Doing it earlier allows us to set prompts from the interpreter
+
     def _setupInterpreter(self):
         self.interpreter = self.interpreterClass(self, self.namespace)
-
 
     def handle_INT(self):
         """
@@ -202,13 +213,11 @@ class Manhole(recvline.HistoricRecvLine):
         self.terminal.nextLine()
         self.terminal.write(self.ps[self.pn])
 
-
     def handle_EOF(self):
         if self.lineBuffer:
             self.terminal.write('\a')
         else:
             self.handle_QUIT()
-
 
     def handle_FF(self):
         """
@@ -219,10 +228,8 @@ class Manhole(recvline.HistoricRecvLine):
         self.terminal.cursorHome()
         self.drawInputLine()
 
-
     def handle_QUIT(self):
         self.terminal.loseConnection()
-
 
     def _needsNewline(self):
         w = self.terminal.lastWrite
@@ -231,7 +238,8 @@ class Manhole(recvline.HistoricRecvLine):
     def addOutput(self, bytes, async=False):
         if async:
             self.terminal.eraseLine()
-            self.terminal.cursorBackward(len(self.lineBuffer) + len(self.ps[self.pn]))
+            self.terminal.cursorBackward(
+                len(self.lineBuffer) + len(self.ps[self.pn]))
 
         self.terminal.write(bytes)
 
@@ -250,6 +258,7 @@ class Manhole(recvline.HistoricRecvLine):
 
     def lineReceived(self, line):
         d = defer.maybeDeferred(self.interpreter.push, line)
+
         def cb(more):
             self.pn = bool(more)
             if self._needsNewline():
@@ -259,9 +268,11 @@ class Manhole(recvline.HistoricRecvLine):
         return d
 
 # gets instantiated when the first command is entered and passed
+
+
 class CmdInterpreter(Interpreter):
     cmdClass = None # subclasses should set this
-    
+
     _cmd = None
 
     def __init__(self, handler, localss=None):
@@ -272,12 +283,13 @@ class CmdInterpreter(Interpreter):
         self.handler.ps = (self._cmd.prompt, '... ')
 
     # FIXME: integrate into Twisted
+
     def push(self, line):
         """
         This version of push returns a deferred that will fire when the command
         is done and the interpreter can show the next prompt.
         """
-        
+
         assert type(line) is not unicode
         # now we have self.handler.terminal
         self._cmd = self.cmdClass(stdout=self.handler.terminal)
@@ -290,7 +302,9 @@ class CmdInterpreter(Interpreter):
 
         # push should only return something if it wants a more prompt
 
+
 class CmdManhole(Manhole):
+
     interpreterClass = CmdInterpreter
 
     def __init__(self, namespace=None, connectionLostDeferred=None):
@@ -316,9 +330,13 @@ class CmdManhole(Manhole):
             self.connectionLostDeferred.callback(reason)
 
 # we do not want loseConnection to self.reset() and clear the screen
+
+
 class CmdServerProtocol(ServerProtocol):
+
     def loseConnection(self):
         self.transport.loseConnection()
+
 
 class Stdio(object):
 
@@ -342,6 +360,7 @@ class Stdio(object):
         # ESC c resets terminal
         #os.write(self._fd, "\r\x1bc\r")
 
+
 def runWithProtocol(klass, *args, **kwargs):
     s = Stdio()
 
@@ -356,6 +375,7 @@ def runWithProtocol(klass, *args, **kwargs):
 
 if __name__ == '__main__':
     # classes defined in if to not pollute module namespace
+
     class MyCmd(cmd.Cmd):
 
         prompt = 'My Command Prompt >>> '
@@ -368,6 +388,7 @@ if __name__ == '__main__':
 
             from twisted.internet import defer
             d = defer.Deferred()
+
             def cb(_):
                 self.stdout.write('the deferred fired\n')
             d.addCallback(cb)
@@ -380,10 +401,8 @@ if __name__ == '__main__':
     class MyCmdInterpreter(CmdInterpreter):
         cmdClass = MyCmd
 
-
     class MyManhole(CmdManhole):
         interpreterClass = MyCmdInterpreter
-
 
 
     runWithProtocol(MyManhole)
