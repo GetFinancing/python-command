@@ -177,6 +177,10 @@ class Command(object):
         # create our formatter and add subcommands if we have them
         formatter = CommandHelpFormatter(width=width)
         if self.subCommands:
+            if not self.description:
+                raise AttributeError, \
+                    "%r needs a description for help formatting" % self
+
             for name, command in self.subCommands.items():
                 formatter.addCommand(name, command.summary or
                     command.description)

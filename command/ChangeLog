@@ -1,3 +1,9 @@
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Without a description, format_description never gets called,
+	  so we don't see subcommands.  Assert.
+
 2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
