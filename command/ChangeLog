@@ -1,3 +1,9 @@
+2011-08-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  For commands with subcommands, copy over summary if description
+	  is missing.
+
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
