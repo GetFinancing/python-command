@@ -1,3 +1,8 @@
+2012-05-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  For commands without subcommands, fix usage and %command.
+
 2011-08-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:

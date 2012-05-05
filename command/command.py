@@ -205,9 +205,15 @@ class Command(object):
         if not usage.startswith('%prog'):
             usage = self.name + ' ' + usage
 
-        if usage.find("%command") > -1:
-            usage = usage.split("%command")[0] + '[command]'
         usages = [usage, ]
+        if usage.find("%command") > -1:
+            if self.subCommands:
+                usage = usage.split("%command")[0] + '[command]'
+                usages = [usage, ]
+            else:
+                # %command used in a leaf command
+                usages = usage.split("%command")
+                usages.reverse()
 
         # FIXME: abstract this into getUsage that takes an optional
         # parentCommand on where to stop recursing up
