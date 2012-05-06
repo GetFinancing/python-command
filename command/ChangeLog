@@ -1,3 +1,8 @@
+2012-05-06  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
+	  Provide a real stderr by default.
+
 2012-05-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:

@@ -407,21 +407,27 @@ class Command(object):
         names.reverse()
         return " ".join(names)
 
-    def _getStdout(self):
-        # if set explicitly, use it
-        if self._stdout:
-            return self._stdout
+    def _getStd(self, what):
+
+        ret = getattr(self, '_' + what, None)
+        if ret:
+            return ret
 
         # if I am the root command, default
         if not self.parentCommand:
-            return sys.stdout
+            return getattr(sys, what)
 
         # otherwise delegate to my parent
-        return self.parentCommand.stdout
+        return getattr(self.parentCommand, what)
 
-    stdout = property(_getStdout)
-    # FIXME: do we want a separate one ?
-    stderr = property(_getStdout)
+    def _getStdOut(self):
+        return self._getStd('stdout')
+
+    def _getStdErr(self):
+        return self._getStd('stderr')
+
+    stdout = property(_getStdOut)
+    stderr = property(_getStdErr)
 
 
 class CommandExited(Exception):
