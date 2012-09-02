@@ -398,6 +398,16 @@ if __name__ == '__main__':
 
             return d
 
+        def do_errback(self, args):
+            self.stdout.write('this is a test that errbacks\n')
+
+            from twisted.internet import defer
+            d = defer.Deferred()
+
+            d.errback(KeyError)
+            return d
+
+
     class MyCmdInterpreter(CmdInterpreter):
         cmdClass = MyCmd
 
