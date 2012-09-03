@@ -19,6 +19,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 
     _commands = None
     _aliases = None
+    _klass = None
 
     def addCommand(self, name, description):
         if self._commands is None:
@@ -29,6 +30,9 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
         if self._aliases is None:
             self._aliases = []
         self._aliases.append(alias)
+
+    def setClass(self, klass):
+        self._klass = klass
 
     ### override parent method
 
@@ -69,6 +73,11 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
                 formatString = "  %-" + "%d" % length + "s  %s"
                 commandDesc.append(formatString % (name, self._commands[name]))
             ret += "\n" + "\n".join(commandDesc) + "\n"
+
+        # add class info
+        ret += "\nImplemented by: %s.%s\n" % (
+            self._klass.__module__, self._klass.__name__)
+
         return ret
 
 
@@ -176,6 +185,7 @@ class Command(object):
 
         # create our formatter and add subcommands if we have them
         formatter = CommandHelpFormatter(width=width)
+        formatter.setClass(self.__class__)
         if self.subCommands:
             if not self.description:
                 if self.summary:
@@ -272,7 +282,7 @@ class Command(object):
         """
         # note: no arguments should be passed as an empty list, not a list
         # with an empty str as ''.split(' ') returns
-        self.debug('calling %r.parse_args' % self)
+        self.debug('calling %r.parse_args(%r)' % (self, argv))
         self.options, args = self.parser.parse_args(argv)
         self.debug('called %r.parse_args' % self)
 
@@ -282,7 +292,9 @@ class Command(object):
 
         # FIXME: make handleOptions not take options, since we store it
         # in self.options now
+        self.debug('calling %r.handleOptions(%r)' % (self, self.options))
         ret = self.handleOptions(self.options)
+        self.debug('called %r.handleOptions, returned %r' % (self, ret))
         if ret:
             return ret
 
@@ -313,7 +325,8 @@ class Command(object):
         # defer to our do() method
         # allows implementing a do() for commands that also have subcommands
         if not args or not self.subCommands:
-            self.debug('no args or no subcommands, doing')
+            self.debug('no args or no subcommands, calling %r.do(%r)' % (
+                self, args))
             try:
                 ret = self.do(args)
             except CommandOk, e:
