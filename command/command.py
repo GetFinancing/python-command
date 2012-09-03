@@ -410,6 +410,19 @@ class Command(object):
             c = c.parentCommand
         return c
 
+    def warning(self, format, *args):
+        """
+        Override me to handle warning output from this class.
+        """
+        pass
+
+    def info(self, format, *args):
+        """
+        Override me to handle info output from this class.
+        """
+        pass
+
+
     def debug(self, format, *args):
         """
         Override me to handle debug output from this class.

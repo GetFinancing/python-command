@@ -1,6 +1,13 @@
 2012-09-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  Add stubs for info and warning.
+	* tcommand.py:
+	  Debug exceptions and failures.
+
+2012-09-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Add debugging on return values.
 
 2012-09-03  Thomas Vander Stichele  <thomas at apestaart dot org>

@@ -6,6 +6,7 @@ A helper class for Twisted commands.
 """
 
 from twisted.internet import defer
+from twisted.python import failure
 
 import command
 
@@ -32,19 +33,25 @@ class TwistedCommand(command.Command):
             try:
                 d = defer.maybeDeferred(self.doLater, args)
             except Exception:
+                f = failure.Failure()
+                self.warning('Exception during doLater: %r',
+                    f.getErrorMessage())
                 self.reactor.stop()
                 raise
 
             d.addCallback(lambda _: self.reactor.stop())
-            def eb(failure):
-                self.stderr.write('Failure: %s\n' % failure.getErrorMessage())
+            def eb(f):
+                self.warning('errback: %r', f.getErrorMessage())
+                self.stderr.write('Failure: %s\n' % f.getErrorMessage())
 
                 self.reactor.stop()
             d.addErrback(eb)
 
         self.reactor.callLater(0, later)
 
+        self.debug('running reactor')
         self.reactor.run()
+        self.debug('ran reactor')
 
     ### command.TwistedCommand methods to implement by subclasses
     def doLater(self):
