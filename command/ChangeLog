@@ -1,6 +1,11 @@
 2012-09-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* command.py:
+	  Add debugging on return values.
+
+2012-09-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* command.py:
 	  Add debugging when going into subcommand methods.
 	  Show which python class implements a command.
 

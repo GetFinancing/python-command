@@ -329,17 +329,22 @@ class Command(object):
                 self, args))
             try:
                 ret = self.do(args)
+                self.debug('done ok, returned %r', ret)
             except CommandOk, e:
+                self.debug('done with exception, raised %r', e)
                 ret = e.status
                 self.stdout.write(e.output + '\n')
             except CommandExited, e:
+                self.debug('done with exception, raised %r', e)
                 ret = e.status
                 self.stderr.write(e.output + '\n')
             except NotImplementedError:
+                self.debug('done with NotImplementedError')
                 self.parser.print_usage(file=self.stderr)
                 self.stderr.write(
                     "Use --help to get a list of commands.\n")
                 return 1
+
 
             # if everything's fine, we return 0
             if not ret:
