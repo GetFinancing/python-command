@@ -36,13 +36,14 @@ class TwistedCommand(command.Command):
                 f = failure.Failure()
                 self.warning('Exception during doLater: %r',
                     f.getErrorMessage())
+                self.stderr.write('Exception: %s\n' % f.value)
                 self.reactor.stop()
                 raise
 
             d.addCallback(lambda _: self.reactor.stop())
             def eb(f):
                 self.warning('errback: %r', f.getErrorMessage())
-                self.stderr.write('Failure: %s\n' % f.getErrorMessage())
+                self.stderr.write('Failure: %s\n' % f.value)
 
                 self.reactor.stop()
             d.addErrback(eb)
