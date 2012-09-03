@@ -9,8 +9,13 @@ from twisted.internet import defer
 
 import command
 
-# FIXME: move this to the command module
 class TwistedCommand(command.Command):
+    """
+    I am a Command that integrates with Twisted and its reactor.
+
+    Instead of implementing the do() method, subclasses should implement a
+    doLater() method which returns a deferred.
+    """
 
     def installReactor(self):
         """
@@ -19,6 +24,7 @@ class TwistedCommand(command.Command):
         from twisted.internet import reactor
         self.reactor = reactor
 
+    ### command.Command implementations
     def do(self, args):
         self.installReactor()
 
@@ -40,5 +46,9 @@ class TwistedCommand(command.Command):
 
         self.reactor.run()
 
+    ### command.TwistedCommand methods to implement by subclasses
     def doLater(self):
+        """
+        @rtype: L{defer.Deferred}
+        """
         raise NotImplementedError
