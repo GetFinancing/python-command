@@ -1,0 +1,15 @@
+Command
+	organizable in a tree
+	reusable in a process by command interpreter
+	self-documenting
+Debugging
+	base Command class has fake debug() method
+Twisted commands
+	doLater() which returns a deferred
+	who runs the reactor ?
+		reactor should not be run() by default by command, since a command should be reusable in a process
+		main function/program ?
+		a specific ReactorCommand that is the root, or implements a command interpreter
+Main program
+	should instantiate the root command
+	should invoke c.parse(args)
