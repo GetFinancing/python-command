@@ -347,11 +347,39 @@ class CmdServerProtocol(ServerProtocol):
 
 
 class Stdio(object):
+    _fd = None
 
     def setup(self):
         self._fd = sys.__stdin__.fileno()
         self._oldSettings = termios.tcgetattr(self._fd)
+        self.setraw()
+
+    def setraw(self):
+        # We want to use our special command line handling
         tty.setraw(self._fd)
+
+        # The implementation of tty.setraw strips OPOST, disabling output
+        # processing, and so \n does not return to carriage.
+        # Turn it back on similarly to tty.setraw
+        mode = termios.tcgetattr(self._fd)
+        mode[tty.OFLAG] = mode[tty.OFLAG] | termios.OPOST
+        termios.tcsetattr(self._fd, termios.TCSANOW, mode)
+
+    def getPassword(self, prompt=None):
+        if self._fd is not None:
+            # go to cbreak mode, where interrupts are handled
+            tty.setcbreak(self._fd)
+            # reset terminal, so that we can actually get the newline that
+            # terminates entering the password
+            termios.tcsetattr(self._fd, termios.TCSANOW, self._oldSettings)
+
+        from twisted.python import util
+        password = util.getPassword(prompt=prompt)
+
+        if self._fd is not None:
+            self.setraw()
+
+        return password
 
     def connect(self, klass, *args, **kwargs):
 
