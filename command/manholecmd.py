@@ -2,6 +2,8 @@
 # Copyright (c) 2001-2007 Twisted Matrix Laboratories.
 # See LICENSE for details.
 
+# taken from twisted.conch.manhole
+
 """
 Line-input oriented interactive interpreter loop.
 
@@ -49,6 +51,7 @@ class FileWrapper:
         self.write(''.join(lines))
 
 
+# FIXME: not sure where this is from
 class Interpreter(object):
 
     def __init__(self, handler, namespace=None):
@@ -57,7 +60,7 @@ class Interpreter(object):
     def push(self, line):
         raise NotImplementedError
 
-
+# FIXME: again from twisted.conch.manhole
 class ManholeInterpreter(Interpreter, code.InteractiveInterpreter):
     """Interactive Interpreter with special output and Deferred support.
 
@@ -267,8 +270,9 @@ class Manhole(recvline.HistoricRecvLine):
         d.addCallback(cb)
         return d
 
-# gets instantiated when the first command is entered and passed
+### this is our code
 
+# gets instantiated when the first command is entered and passed
 
 class CmdInterpreter(Interpreter):
     cmdClass = None # subclasses should set this
