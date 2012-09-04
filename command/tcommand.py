@@ -89,8 +89,8 @@ class ReactorCommand(command.Command):
             r = command.Command.parse(self, argv)
         except Exception:
             f = failure.Failure()
-            self.warning('Exception during %r.parse: %r',
-                self, f.getErrorMessage())
+            self.warning('Exception during %r.parse: %r\n%s\n',
+                self, f.getErrorMessage(), f.getTraceback())
             self.stderr.write('Exception: %s\n' % f.value)
             raise
 
