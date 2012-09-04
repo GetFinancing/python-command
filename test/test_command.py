@@ -21,7 +21,7 @@ import sys
 import unittest
 import StringIO
 
-import command
+from command import command
 
 
 class CommandTestCase(unittest.TestCase):
