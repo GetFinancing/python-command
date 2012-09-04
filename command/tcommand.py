@@ -130,7 +130,7 @@ class ReactorCommand(command.Command):
                 return reason
             else:
                 self.warning('errback: %r', failure.getErrorMessage())
-                self.stderr.write('Failure: %s\n' % f.value)
+                self.stderr.write('Failure: %s\n' % failure.value)
                 self.returnValue = failure
                 return failure
 
