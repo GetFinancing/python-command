@@ -332,7 +332,9 @@ class CmdManhole(Manhole):
         Override me for custom behaviour.
         """
         if not self.connectionLostDeferred:
+            # FIXME: should we really be handling the reactor here?
             from twisted.internet import reactor
+
             reactor.stop()
         else:
             self.connectionLostDeferred.callback(reason)
@@ -409,6 +411,8 @@ def runWithProtocol(klass, *args, **kwargs):
     finally:
         s.teardown()
 
+
+# example code, showing how to create your own interpreter and manhole
 if __name__ == '__main__':
     # classes defined in if to not pollute module namespace
 
