@@ -72,12 +72,12 @@ class FakeCommandTestCase(unittest.TestCase):
     def testNoCommand(self):
         ret = self.c.parse([])
         self.assertEquals(ret, 1)
-        out = self.err.getvalue()
-        self.failIf(out, "Should not get output on stderr, but got %r" % out)
-        # It seems the F7 version uppercases the first letter, making it Usage
         out = self.out.getvalue()
+        self.failIf(out, "Should not get output on stdout, but got %r" % out)
+        # It seems the F7 version uppercases the first letter, making it Usage
+        out = self.err.getvalue()
         self.failUnless(out[1:].startswith('sage:'),
-            "output %s does not start with U/usage" % out)
+            "error output %s does not start with U/usage" % out)
 
 
 class FakeSubCommandTestCase(unittest.TestCase):
