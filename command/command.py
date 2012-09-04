@@ -34,6 +34,26 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
     def setClass(self, klass):
         self._klass = klass
 
+    def getCommands(self):
+        ret = ""
+
+        if self._commands:
+            commandDesc = []
+            commandDesc.append("Commands:")
+            keys = self._commands.keys()
+            keys.sort()
+            length = 0
+            for key in keys:
+                if len(key) > length:
+                    length = len(key)
+            for name in keys:
+                formatString = "  %-" + "%d" % length + "s  %s"
+                commandDesc.append(formatString % (name, self._commands[name]))
+            ret += "\n" + "\n".join(commandDesc) + "\n"
+
+        return ret
+
+
     ### override parent method
 
     def format_description(self, description, width=None):
@@ -60,19 +80,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
             ret += "\nAliases: " + ", ".join(self._aliases) + "\n"
 
         # add subcommands
-        if self._commands:
-            commandDesc = []
-            commandDesc.append("Commands:")
-            keys = self._commands.keys()
-            keys.sort()
-            length = 0
-            for key in keys:
-                if len(key) > length:
-                    length = len(key)
-            for name in keys:
-                formatString = "  %-" + "%d" % length + "s  %s"
-                commandDesc.append(formatString % (name, self._commands[name]))
-            ret += "\n" + "\n".join(commandDesc) + "\n"
+        ret += self.getCommands()
 
         # add class info
         ret += "\nImplemented by: %s.%s\n" % (
@@ -107,6 +115,11 @@ class CommandOptionParser(optparse.OptionParser):
     # we're overriding the built-in file, but we need to since this is
     # the signature from the base class
     __pychecker__ = 'no-shadowbuiltin'
+
+    def print_commands(self, file=None):
+        if file is None:
+            file = self._stdout
+        file.write(self.formatter.getCommands())
 
     def print_help(self, file=None):
         # we are overriding a parent method so we can't do anything about file
@@ -370,8 +383,12 @@ class Command(object):
             if command in self.aliasedSubCommands.keys():
                 return self.aliasedSubCommands[command].parse(args[1:])
 
-        self.stderr.write("Unknown command '%s'.\n" % command.encode('utf-8'))
-        self.parser.print_usage(file=self.stderr)
+        if not command:
+            self.stderr.write("Please specify a subcommand.\n")
+        else:
+            self.stderr.write("Unknown command '%s'.\n"
+                % command.encode('utf-8'))
+            self.parser.print_commands(file=self.stderr)
         return 1
 
     def handleOptions(self, options):
