@@ -302,9 +302,13 @@ class CmdInterpreter(Interpreter):
         if hasattr(self._cmd, 'command'):
             self._cmd.command.getRootCommand()._stdout = self.handler.terminal
         r = self._cmd.onecmd(line)
-        return r
 
         # push should only return something if it wants a more prompt
+        # return r
+
+    # called by handle_INT
+    def resetBuffer(self):
+        pass
 
 
 class CmdManhole(Manhole):
