@@ -18,41 +18,37 @@ class TwistedCommand(command.Command):
     doLater() method which returns a deferred.
     """
 
-    def installReactor(self):
+    def installReactor(self, reactor=None):
         """
-        Override me to install your own reactor.
+        Override me to install your own reactor in the parent
+        ReactorCommand.
         """
-        from twisted.internet import reactor
-        self.reactor = reactor
+        self.debug('installing reactor %r in ancestor ReactorCommand',
+            reactor)
+        c = self
+        while c.parentCommand and not isinstance(c, ReactorCommand):
+            c = c.parentCommand
+
+        if not c:
+            raise AssertionError(
+                '%r does not have a parent ReactorCommand' % self)
+
+        self.debug('installing reactor %r in ancestor ReactorCommand %r',
+            reactor, c)
+
+        c.installReactor(reactor)
 
     ### command.Command implementations
     def do(self, args):
+        self.debug('%r: installing reactor using method %r', self,
+            self.installReactor)
         self.installReactor()
 
-        def later():
-            try:
-                d = defer.maybeDeferred(self.doLater, args)
-            except Exception:
-                f = failure.Failure()
-                self.warning('Exception during doLater: %r',
-                    f.getErrorMessage())
-                self.stderr.write('Exception: %s\n' % f.value)
-                self.reactor.stop()
-                raise
+        d = self.doLater(args)
+        if isinstance(d, defer.Deferred):
+            self.debug('doLater returns a deferred, install reactor')
 
-            d.addCallback(lambda _: self.reactor.stop())
-            def eb(f):
-                self.warning('errback: %r', f.getErrorMessage())
-                self.stderr.write('Failure: %s\n' % f.value)
-
-                self.reactor.stop()
-            d.addErrback(eb)
-
-        self.reactor.callLater(0, later)
-
-        self.debug('running reactor')
-        self.reactor.run()
-        self.debug('ran reactor')
+        return d
 
     ### command.TwistedCommand methods to implement by subclasses
     def doLater(self):
@@ -60,3 +56,89 @@ class TwistedCommand(command.Command):
         @rtype: L{defer.Deferred}
         """
         raise NotImplementedError
+
+
+class ReactorCommand(command.Command):
+    """
+    I am a Command that runs a reactor for its subcommands if they
+    return a L{defer.Deferred} from their doLater() method.
+    """
+
+    reactor = None
+    returnValue = None
+
+    def installReactor(self, reactor=None):
+        """
+        Override me to install your own reactor.
+        """
+        self.debug('ReactorCommand: installing reactor %r', reactor)
+        if not reactor:
+            from twisted.internet import reactor
+
+        self.reactor = reactor
+
+    ### command.Command overrides
+
+    def parse(self, argv):
+        """
+        @returns: a deferred that will fire when the command is parsed and
+                  executed.
+        """
+        self.debug('parse: chain up')
+        try:
+            r = command.Command.parse(self, argv)
+        except Exception:
+            f = failure.Failure()
+            self.warning('Exception during %r.parse: %r',
+                self, f.getErrorMessage())
+            self.stderr.write('Exception: %s\n' % f.value)
+            raise
+
+        self.debug('parse: result %r', r)
+
+        if not isinstance(r, defer.Deferred):
+            return r
+
+        # We have a deferred, so we need to run a reactor
+        d = r
+
+        # child commands could have installed a reactor
+        if not self.reactor:
+            self.installReactor()
+
+        def parseCb(ret):
+            if ret is None:
+                self.debug('parse returned None, defaults to exit code 0')
+                ret = 0
+            elif ret:
+                self.debug('parse returned %r' % ret)
+            elif self.parser.help_printed or self.parser.usage_printed:
+                ret = 0
+            self.debug('parse: cb: done')
+            self.returnValue = ret
+            self.reactor.stop()
+            return ret
+
+        def eb(failure):
+            self.debug('parse: eb: failure %s' %
+                failure.getErrorMessage())
+            self.reactor.stop()
+            if failure.check(command.CommandExited):
+                self.stderr.write(failure.value.msg + '\n')
+                reason = failure.value.code
+                self.returnValue = reason
+                return reason
+            else:
+                self.warning('errback: %r', failure.getErrorMessage())
+                self.stderr.write('Failure: %s\n' % f.value)
+                self.returnValue = failure
+                return failure
+
+        d.addCallback(parseCb)
+        d.addErrback(eb)
+
+        self.debug('running reactor %r', self.reactor)
+        self.reactor.run()
+        self.debug('ran reactor, returning %r' % self.returnValue)
+
+        return self.returnValue
