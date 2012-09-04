@@ -1,12 +1,19 @@
 This module implements commands with subtrees of commands.
 
-Suggested use in your project (if you are using Subversion):
+Suggested use in your project (if you are using git):
 
-- create myproject/extern directory
-- svn commit myproject/extern
-- svn propset svn:externals "command https://thomas.apestaart.org/moap/svn/trunk/moap/extern/command"
-
-Alternatively, you can embed only the command.py file with proper svn:externals.
-
-If you are worried about stability, check out a specific revision by
-putting -r (revision number) in between log and https
+- create myproject/extern directory and package:
+  export PROJECT=myproject
+  mkdir -p $PROJECT/extern
+  touch $PROJECT/extern/__init__.py
+- add the submodule:
+  git submodule add https://github.com/thomasvs/python-command.git $PROJECT/extern/python-command
+  pushd
+  cd $PROJECT/extern
+  ln -sf python-command/command command
+  popd
+- test if you can import it:
+  python -c "from $PROJECT.extern.command import command; print command"
+- Commit the result to git
+  git add $PROJECT/extern/command
+  git commit -m "add python command module" .gitmodules $PROJECT/extern/command
