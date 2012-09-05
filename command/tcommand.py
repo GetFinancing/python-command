@@ -45,8 +45,6 @@ class TwistedCommand(command.Command):
         self.installReactor()
 
         d = self.doLater(args)
-        if isinstance(d, defer.Deferred):
-            self.debug('doLater returns a deferred, install reactor')
 
         return d
 
