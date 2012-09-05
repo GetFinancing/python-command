@@ -317,6 +317,9 @@ class Command(object):
 
             # give help on current command if only 'help' is passed
             if len(args) == 1:
+                # start on a newline for the case where we're in the
+                # interpreter
+                self.stdout.write('\n')
                 self.outputHelp()
                 return 0
 
@@ -581,7 +584,10 @@ def commandToCmdClass(command):
         def generateHelp(c):
 
             def help_(s):
-                command.parser.print_help(file=s.stdout)
+                # add a newline because we're still at the end of the help
+                # command on the prompt
+                s.stdout.write('\n')
+                c.parser.print_help(file=s.stdout)
             return help_
 
         method = generateHelp(subCommand)
