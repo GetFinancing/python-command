@@ -64,6 +64,7 @@ class ReactorCommand(command.Command):
 
     reactor = None
     returnValue = None
+    _reactorRunning = False
 
     def installReactor(self, reactor=None):
         """
@@ -114,19 +115,28 @@ class ReactorCommand(command.Command):
                 ret = 0
             self.debug('parse: cb: done')
             self.returnValue = ret
-            self.reactor.stop()
+            if self._reactorRunning:
+                self._reactorRunning = False
+                self.debug('stopping reactor')
+                self.reactor.stop()
             return ret
 
         def eb(failure):
             self.debug('parse: eb: failure %s' %
                 failure.getErrorMessage())
-            self.reactor.stop()
             if failure.check(command.CommandExited):
                 self.stderr.write(failure.value.msg + '\n')
                 reason = failure.value.code
                 self.returnValue = reason
                 return reason
             else:
+                # this is a failure we will reraise, so we're responsible
+                # of stopping the reactor
+                # we can get here even before we run the reactor below;
+                # so schedule a stop instead of doing it here
+                # self.reactor.stop()
+                self.reactor.callLater(0, self.reactor.stop)
+
                 self.warning('errback: %r', failure.getErrorMessage())
                 self.stderr.write('Failure: %s\n' % failure.value)
                 self.returnValue = failure
@@ -135,8 +145,13 @@ class ReactorCommand(command.Command):
         d.addCallback(parseCb)
         d.addErrback(eb)
 
-        self.debug('running reactor %r', self.reactor)
-        self.reactor.run()
-        self.debug('ran reactor, returning %r' % self.returnValue)
+        if self.returnValue is None:
+            self.debug('running reactor %r', self.reactor)
+            self._reactorRunning = True
+            self.reactor.run()
+            self.debug('ran reactor, returning %r' % self.returnValue)
+        else:
+            self.debug('got return value before reactor ran, returning %r'
+                % self.returnValue)
 
         return self.returnValue
