@@ -325,6 +325,9 @@ class CmdInterpreter(Interpreter):
     def resetBuffer(self):
         pass
 
+    def debug(self, format, args):
+        pass
+
 
 class CmdManhole(Manhole):
 
