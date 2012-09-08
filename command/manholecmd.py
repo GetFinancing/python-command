@@ -308,10 +308,18 @@ class CmdInterpreter(Interpreter):
         # FIXME: pokes in internals
         if hasattr(self._cmd, 'command'):
             self._cmd.command.getRootCommand()._stdout = self.handler.terminal
-        r = self._cmd.onecmd(line)
+        d = defer.maybeDeferred(self._cmd.onecmd, line)
+        # according to the docs, 'The return value is a flag indicating whether
+        # interpretation of commands by the interpreter should stop.'
+        # However, this just gets the return value of our command's do()
+        self.debug('onecmd returned maybeDeferred %r', d)
+        def cb(value):
+            self.debug('onecmd fired %r', value)
+            return 0
+        d.addCallback(cb)
 
-        # push should only return something if it wants a more prompt
-        # return r
+        # push should only return non-zero if it wants a more prompt
+        return d
 
     # called by handle_INT
     def resetBuffer(self):
