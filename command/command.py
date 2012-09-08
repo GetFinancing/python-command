@@ -586,11 +586,14 @@ def commandToCmdClass(command):
             def help_(s):
                 # add a newline because we're still at the end of the help
                 # command on the prompt
+                c.debug('Getting help for %r', s)
                 s.stdout.write('\n')
                 c.parser.print_help(file=s.stdout)
             return help_
 
         method = generateHelp(subCommand)
+        command.debug('Adding method %r with name %r to %r' % (
+            method, methodName, cmdClass))
         setattr(cmdClass, methodName, method)
 
     return cmdClass
