@@ -275,8 +275,13 @@ class Manhole(recvline.HistoricRecvLine):
 # gets instantiated when the first command is entered and passed
 
 class CmdInterpreter(Interpreter):
+    """
+    @ivar cmdClass: a subclass of L{cmd.Cmd}
+    @type cmdClass: C{class}
+    """
     cmdClass = None # subclasses should set this
 
+    # instance of self.cmdClass
     _cmd = None
 
     def __init__(self, handler, localss=None):
@@ -292,6 +297,8 @@ class CmdInterpreter(Interpreter):
         """
         This version of push returns a deferred that will fire when the command
         is done and the interpreter can show the next prompt.
+
+        see Manhole.lineReceived()
         """
 
         assert type(line) is not unicode
