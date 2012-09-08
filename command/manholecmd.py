@@ -409,7 +409,7 @@ class Stdio(object):
     def teardown(self):
         os.system('stty sane')
         # we did not actually carriage return the ended prompt
-        print
+        os.write(self._fd, '\n')
         termios.tcsetattr(self._fd, termios.TCSANOW, self._oldSettings)
         # this clears the screen,
         # but also fixes some problem when editing history lines
