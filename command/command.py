@@ -210,7 +210,7 @@ class Command(object):
 
             for name, command in self.subCommands.items():
                 formatter.addCommand(name, command.summary or
-                    command.description)
+                    command.description or '')
 
         if self.aliases:
             for alias in self.aliases:
