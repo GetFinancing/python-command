@@ -349,11 +349,14 @@ class Command(object):
             except CommandOk, e:
                 self.debug('done with exception, raised %r', e)
                 ret = e.status
-                self.stdout.write(e.output + '\n')
+                if e.output is not None:
+                    self.stdout.write(e.output + '\n')
             except CommandExited, e:
                 self.debug('done with exception, raised %r', e)
                 ret = e.status
-                self.stderr.write(e.output + '\n')
+                if e.output is not None:
+                    self.stderr.write(e.output + '\n')
+                return ret
             except NotImplementedError:
                 self.debug('done with NotImplementedError')
                 self.parser.print_usage(file=self.stderr)
@@ -483,7 +486,7 @@ class Command(object):
 
 class CommandExited(Exception):
 
-    def __init__(self, status, output):
+    def __init__(self, status, output=None):
         self.args = (status, output)
         self.status = status
         self.output = output
@@ -491,13 +494,13 @@ class CommandExited(Exception):
 
 class CommandOk(CommandExited):
 
-    def __init__(self, output):
+    def __init__(self, output=None):
         CommandExited.__init__(self, 0, output)
 
 
 class CommandError(CommandExited):
 
-    def __init__(self, output):
+    def __init__(self, output=None):
         CommandExited.__init__(self, 3, output)
 
 
