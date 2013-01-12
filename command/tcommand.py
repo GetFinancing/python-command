@@ -80,13 +80,13 @@ class ReactorCommand(command.Command):
 
     def parse(self, argv):
         """
-        @returns: a deferred that will fire when the command is parsed and
-                  executed.
+        I will run a reactor to get the non-deferred result.
         """
         self.debug('parse: chain up')
         try:
             r = command.Command.parse(self, argv)
         except Exception:
+            # get a full traceback to debug here
             f = failure.Failure()
             self.warning('Exception during %r.parse: %r\n%s\n',
                 self, f.getErrorMessage(), f.getTraceback())
@@ -95,6 +95,7 @@ class ReactorCommand(command.Command):
 
         self.debug('parse: result %r', r)
 
+        # if it's not a deferred, return the result as is
         if not isinstance(r, defer.Deferred):
             return r
 
@@ -122,8 +123,8 @@ class ReactorCommand(command.Command):
             return ret
 
         def eb(failure):
-            self.debug('parse: eb: failure %s' %
-                failure.getErrorMessage())
+            self.debug('parse: eb: failure: %r\n%s\n',
+                failure.getErrorMessage(), failure.getTraceback())
             if failure.check(command.CommandExited):
                 self.stderr.write(failure.value.msg + '\n')
                 reason = failure.value.code
@@ -140,18 +141,27 @@ class ReactorCommand(command.Command):
                 self.warning('errback: %r', failure.getErrorMessage())
                 self.stderr.write('Failure: %s\n' % failure.value)
                 self.returnValue = failure
-                return failure
+                # we handled it by storing it for reraising, so don't
+                # return it
+                return
 
         d.addCallback(parseCb)
         d.addErrback(eb)
 
-        if self.returnValue is None:
-            self.debug('running reactor %r', self.reactor)
-            self._reactorRunning = True
-            self.reactor.run()
-            self.debug('ran reactor, returning %r' % self.returnValue)
-        else:
-            self.debug('got return value before reactor ran, returning %r'
-                % self.returnValue)
+        def raiseIfFailure():
+            if isinstance(self.returnValue, failure.Failure):
+                raise self.returnValue.value
 
+        if self.returnValue is not None:
+            self.debug('got return value before reactor ran, returning %r' %
+                self.returnValue)
+            raiseIfFailure()
+            return self.returnValue
+
+        self.debug('running reactor %r', self.reactor)
+        self._reactorRunning = True
+        self.reactor.run()
+        self.debug('ran reactor, returning %r' % self.returnValue)
+
+        raiseIfFailure()
         return self.returnValue
