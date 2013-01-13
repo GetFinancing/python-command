@@ -125,25 +125,24 @@ class ReactorCommand(command.Command):
         def parseEb(failure):
             self.debug('parse: eb: failure: %r\n%s\n',
                 failure.getErrorMessage(), failure.getTraceback())
+
+            # we can get here even before we run the reactor below;
+            # so schedule a stop instead of doing it here
+            # self.reactor.stop()
+            self.reactor.callLater(0, self.reactor.stop)
+
             if failure.check(command.CommandExited):
-                self.stderr.write(failure.value.msg + '\n')
-                reason = failure.value.code
+                self.stderr.write(failure.value.output + '\n')
+                reason = failure.value.status
                 self.returnValue = reason
                 return reason
-            else:
-                # this is a failure we will reraise, so we're responsible
-                # of stopping the reactor
-                # we can get here even before we run the reactor below;
-                # so schedule a stop instead of doing it here
-                # self.reactor.stop()
-                self.reactor.callLater(0, self.reactor.stop)
 
-                self.warning('errback: %r', failure.getErrorMessage())
-                self.stderr.write('Failure: %s\n' % failure.value)
-                self.returnValue = failure
-                # we handled it by storing it for reraising, so don't
-                # return it
-                return
+            self.warning('errback: %r', failure.getErrorMessage())
+            self.stderr.write('Failure: %s\n' % failure.value)
+            self.returnValue = failure
+            # we handled it by storing it for reraising, so don't
+            # return it
+            return
 
         d.addCallback(parseCb)
         d.addErrback(parseEb)
@@ -161,7 +160,7 @@ class ReactorCommand(command.Command):
         self.debug('running reactor %r', self.reactor)
         self._reactorRunning = True
         self.reactor.run()
-        self.debug('ran reactor, returning %r' % self.returnValue)
-
+        self.debug('ran reactor, got %r' % self.returnValue)
         raiseIfFailure()
+        self.debug('ran reactor, returning %r' % self.returnValue)
         return self.returnValue
