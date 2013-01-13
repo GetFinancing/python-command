@@ -259,15 +259,28 @@ class Manhole(recvline.HistoricRecvLine):
 
                 self._deliverBuffer(oldBuffer)
 
+    def lineReceivedErrback(self, failure):
+        """
+        Called each time lineReceived pushes and triggers an errback.
+        Permits subclasses to handle any errors properly.
+        """
+        self.terminal.write('Unhandled error: %s\n' % failure)
+        return False
+
     def lineReceived(self, line):
         d = defer.maybeDeferred(self.interpreter.push, line)
 
+        d.addErrback(self.lineReceivedErrback)
+
+        # shows the more prompt if we get something Truthy
         def cb(more):
             self.pn = bool(more)
             if self._needsNewline():
                 self.terminal.nextLine()
             self.terminal.write(self.ps[self.pn])
-        d.addCallback(cb)
+        d.addCallbacks(cb, cb)
+
+
         return d
 
 ### this is our code
