@@ -122,7 +122,7 @@ class ReactorCommand(command.Command):
                 self.reactor.stop()
             return ret
 
-        def eb(failure):
+        def parseEb(failure):
             self.debug('parse: eb: failure: %r\n%s\n',
                 failure.getErrorMessage(), failure.getTraceback())
             if failure.check(command.CommandExited):
@@ -146,7 +146,7 @@ class ReactorCommand(command.Command):
                 return
 
         d.addCallback(parseCb)
-        d.addErrback(eb)
+        d.addErrback(parseEb)
 
         def raiseIfFailure():
             if isinstance(self.returnValue, failure.Failure):
