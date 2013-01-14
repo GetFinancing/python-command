@@ -356,13 +356,12 @@ class Command(object):
                 ret = e.status
                 if e.output is not None:
                     self.stderr.write(e.output + '\n')
-                return ret
             except NotImplementedError:
                 self.debug('done with NotImplementedError')
                 self.parser.print_usage(file=self.stderr)
                 self.stderr.write(
                     "Use --help to get a list of commands.\n")
-                return 1
+                ret = 1
 
 
             # if everything's fine, we return 0
