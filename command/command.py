@@ -104,14 +104,25 @@ class CommandOptionParser(optparse.OptionParser):
     usage_printed = False
 
     _stdout = sys.stdout
+    _stderr = sys.stderr
 
     def set_stdout(self, stdout):
         self._stdout = stdout
 
+    def set_stderr(self, stderr):
+        self._stderr = stderr
+
     def parse_args(self, args=None, values=None):
         self.help_printed = False
         self.usage_printed = False
-        return optparse.OptionParser.parse_args(self, args, values)
+        try:
+            return optparse.OptionParser.parse_args(self, args, values)
+        except UnboundLocalError:
+            raise
+            # this can happen when an option is used that requires a
+            # value but none is specified
+            raise CommandError("Missing argument to option")
+
     # we're overriding the built-in file, but we need to since this is
     # the signature from the base class
     __pychecker__ = 'no-shadowbuiltin'
@@ -135,10 +146,14 @@ class CommandOptionParser(optparse.OptionParser):
 
     def exit(self, status=0, msg=None):
         if msg:
-            sys.stderr.write(msg)
+            self._stderr.write(msg)
 
         return status
 
+    # since we override exit not to exit, we need to override error to do
+    def error(self, msg):
+        self.print_usage(self._stderr)
+        raise CommandError(msg)
 
 class Command(object):
     """
@@ -261,6 +276,7 @@ class Command(object):
             usage=usage, description=description,
             formatter=formatter)
         self.parser.set_stdout(self.stdout)
+        self.parser.set_stderr(self.stderr)
         self.parser.disable_interspersed_args()
 
         # allow subclasses to add options
