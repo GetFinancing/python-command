@@ -9,6 +9,7 @@
 
 import sys
 import StringIO
+import time
 
 
 def walk(command, level=0):
@@ -55,7 +56,7 @@ def main():
 
 
     man = []
-    man.append('.TH "rip" "1" "October 2009"')
+    man.append('.TH "%s" "1" "%s"' % (sys.argv[2], time.strftime("%B %Y")))
     man.extend(manwalk(obj(width=70)))
 
     print "\n".join(man)
