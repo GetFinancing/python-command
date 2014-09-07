@@ -49,7 +49,7 @@ class TwistedCommand(command.Command):
         return d
 
     ### command.TwistedCommand methods to implement by subclasses
-    def doLater(self):
+    def doLater(self, args):
         """
         @rtype: L{defer.Deferred}
         """
