@@ -27,7 +27,7 @@ from twisted.internet import stdio, defer
 
 from twisted.conch.insults.insults import ServerProtocol
 
-
+# usable as a wrapper for sys.stdout and sys.stderr
 class FileWrapper:
     """Minimal write-file-like object.
 
@@ -446,6 +446,7 @@ def runWithProtocol(klass, *args, **kwargs):
 # example code, showing how to create your own interpreter and manhole
 if __name__ == '__main__':
     # classes defined in if to not pollute module namespace
+    # cmd.Cmd only has stdout, no stderr
 
     class MyCmd(cmd.Cmd):
 
